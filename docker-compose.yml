@@ -1,0 +1,11 @@
+version: "3.7"
+services:
+  app:
+    build:
+      dockerfile: ./Dockerfile
+      context: .
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "13001:3000"
+    stdin_open: true
