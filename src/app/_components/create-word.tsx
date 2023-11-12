@@ -1,43 +1,110 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useUser } from "@clerk/nextjs";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/app/_components/ui/form";
 
 import { api } from "~/trpc/react";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+
+const FormSchema = z.object({
+  name: z
+    .string({
+      required_error: "Please write a name",
+    })
+    .min(1, { message: "You must enter a name" })
+    .max(256, { message: "Name too long" })
+    .describe("Name"),
+
+  translation: z
+    .string({
+      required_error: "Please write a translation",
+    })
+    .min(1, { message: "You must enter translation" })
+    .max(256, { message: "Translation too long" })
+    .describe("Translation"),
+});
 
 export function CreateWord() {
-  const router = useRouter();
-  const [name, setName] = useState("");
+  const { user } = useUser();
 
-  const createWord = api.word.create.useMutation({
-    onSuccess: () => {
-      router.refresh();
-      setName("");
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: "wissen",
+      translation: "vediet",
     },
   });
 
+  const createWord = api.word.create.useMutation({
+    onSuccess: () => {
+      form.reset();
+    },
+  });
+
+  function onSubmit(data: z.infer<typeof FormSchema>) {
+    if (!user?.id) {
+      alert("Not logged in ...somehow");
+      return;
+    }
+    if (!user.primaryEmailAddress) {
+      alert("You need to have an email address set to create a reminder!");
+      return;
+    }
+    const newValues = {
+      name: data.name,
+      translation: data.translation,
+      userId: user.id,
+    };
+    createWord.mutate(newValues);
+  }
+
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        createWord.mutate({ name, translation: "lol", userId: "asasd" });
-      }}
-      className="flex flex-col gap-2"
-    >
-      <input
-        type="text"
-        placeholder="Title"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="w-full rounded-full px-4 py-2 text-black"
-      />
-      <button
-        type="submit"
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold transition hover:bg-white/20"
-        disabled={createWord.isLoading}
-      >
-        {createWord.isLoading ? "Submitting..." : "Submit"}
-      </button>
-    </form>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className={`space-y-6`}>
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input placeholder="My reminder" {...field} />
+              </FormControl>
+              <FormDescription>Name of the reminder</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="translation"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Translation</FormLabel>
+              <FormControl>
+                <Input placeholder="My reminder" {...field} />
+              </FormControl>
+              <FormDescription>Name of the reminder</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit">Create</Button>
+      </form>
+    </Form>
   );
 }
