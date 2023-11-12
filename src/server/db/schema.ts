@@ -18,11 +18,13 @@ import {
  */
 export const mysqlTable = mysqlTableCreator((name) => `vocabulary_${name}`);
 
-export const posts = mysqlTable(
-  "post",
+export const word = mysqlTable(
+  "word",
   {
     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
     name: varchar("name", { length: 256 }),
+    translation: varchar("translation", { length: 256 }),
+    userId: varchar("user_id", { length: 256 }).notNull(),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -30,5 +32,5 @@ export const posts = mysqlTable(
   },
   (example) => ({
     nameIndex: index("name_idx").on(example.name),
-  })
+  }),
 );
