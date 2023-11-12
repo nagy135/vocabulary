@@ -18,6 +18,7 @@ import {
 import { api } from "~/trpc/react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { useToast } from "./ui/use-toast";
 
 const FormSchema = z.object({
   name: z
@@ -39,6 +40,7 @@ const FormSchema = z.object({
 
 export function CreateWord() {
   const { user } = useUser();
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -51,6 +53,10 @@ export function CreateWord() {
 
   const createWord = api.word.create.useMutation({
     onSuccess: () => {
+      toast({
+        title: "Created successfully",
+        description: "Translation pair has been created",
+      });
       form.reset();
     },
   });
