@@ -8,13 +8,17 @@ export default async function PracticePage() {
   const user = await currentUser();
   if (!user) return <div>Not logged in</div>;
 
-  const words = await api.word.hello.query(user.id);
-  console.log("================\n", "hello: ", words, "\n================");
+  const words = await api.word.getAllByUserId.query(user.id);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center ">
       <Navigation currentPage={Page.practice} />
-      <Practice practicePairs={[]} />
+      <Practice
+        practicePairs={words.map((e) => ({
+          name: e.name ?? "",
+          translation: e.translation ?? "",
+        }))}
+      />
     </main>
   );
 }
