@@ -21,6 +21,9 @@ export const wordRouter = createTRPCRouter({
       });
     }),
 
+  hello: publicProcedure.input(z.string()).query(({ input }) => {
+    return `hello ${input}`;
+  }),
   getAllByUserId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
     return ctx.db.query.word.findMany({
       where: eq(word.userId, input),
