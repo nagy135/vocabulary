@@ -67,7 +67,7 @@ export function CreateWord() {
       return;
     }
     if (!user.primaryEmailAddress) {
-      alert("You need to have an email address set to create a reminder!");
+      alert("You need to have an email address set to create a word!");
       return;
     }
     const newValues = {
@@ -88,9 +88,9 @@ export function CreateWord() {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="My reminder" {...field} />
+                <Input placeholder="My word" {...field} />
               </FormControl>
-              <FormDescription>Name of the reminder</FormDescription>
+              <FormDescription>Name of the word</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -102,9 +102,9 @@ export function CreateWord() {
             <FormItem>
               <FormLabel>Translation</FormLabel>
               <FormControl>
-                <Input placeholder="My reminder" {...field} />
+                <Input placeholder="My translation" {...field} />
               </FormControl>
-              <FormDescription>Name of the reminder</FormDescription>
+              <FormDescription>Name of the translation</FormDescription>
               <FormMessage />
             </FormItem>
           )}

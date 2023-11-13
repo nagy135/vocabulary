@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
@@ -17,6 +18,13 @@ export const wordRouter = createTRPCRouter({
         name,
         translation,
         userId,
+      });
+    }),
+  getAllByUserId: publicProcedure
+    .input(z.string().min(1))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.word.findMany({
+        where: eq(word.userId, input),
       });
     }),
 });

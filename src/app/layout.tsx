@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 
 import { ThemeProvider } from "~/app/_components/providers/theme";
 import { ThemeSwitcher } from "~/app/_components/theme-switcher";
+
 import { Toaster } from "~/app/_components/ui/toaster";
 import { TRPCReactProvider } from "~/trpc/react";
 import { ClerkProvider, SignedIn, UserButton } from "@clerk/nextjs";
