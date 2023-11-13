@@ -1,4 +1,8 @@
-FROM oven/bun:1
+FROM ubuntu:latest
+
+RUN apt install npm
+
+RUN npm install -g bun
 
 COPY . .
 
