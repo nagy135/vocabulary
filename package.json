@@ -7,6 +7,7 @@
     "db:push": "dotenv drizzle-kit push:mysql",
     "db:studio": "dotenv drizzle-kit studio",
     "dev": "next dev",
+    "preview-email": "email dev",
     "lint": "next lint",
     "start": "next start"
   },
@@ -32,6 +33,7 @@
     "@trpc/next": "^10.37.1",
     "@trpc/react-query": "^10.37.1",
     "@trpc/server": "^10.37.1",
+    "@types/nodemailer": "^6.4.13",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "date-fns": "^2.30.0",
@@ -71,6 +73,5 @@
   },
   "ct3aMetadata": {
     "initVersion": "7.22.0"
-  },
-  "packageManager": "npm@8.19.3"
+  }
 }
