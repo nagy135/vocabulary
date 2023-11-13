@@ -20,13 +20,14 @@ export const wordRouter = createTRPCRouter({
         userId,
       });
     }),
+
   getAllByUserId: publicProcedure
-    .input(z.string().min(1).optional())
-    .query(async ({ ctx, input }) => {
+    .input(z.string().optional())
+    .query(({ ctx, input }) => {
       if (input)
-        return await ctx.db.query.word.findMany({
+        return ctx.db.query.word.findMany({
           where: eq(word.userId, input),
         });
-      else return await ctx.db.query.word.findMany();
+      else return ctx.db.query.word.findMany();
     }),
 });
