@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-RUN apt install npm
+RUN apt install -y npm
 
 RUN npm install -g bun
 
