@@ -3,7 +3,7 @@
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
-import { PracticePair } from "~/types";
+import { type PracticePair } from "~/types";
 import { useCallback, useRef, useState } from "react";
 
 function pickRandomElement<T>(array: T[]): T | undefined {
@@ -20,7 +20,7 @@ export function Practice({ practicePairs }: { practicePairs: PracticePair[] }) {
   const onSubmit = useCallback(
     (resolution: "easy" | "repeat" | "hard") => {
       if (resolution === "easy") {
-        known.current.push(currentTranslation as string);
+        known.current.push(currentTranslation!);
       }
       let pair = pickRandomElement(practicePairs);
       if (!pair) {
@@ -43,7 +43,7 @@ export function Practice({ practicePairs }: { practicePairs: PracticePair[] }) {
       }
       setCurrentTranslation(pair.translation);
     },
-    [currentTranslation],
+    [currentTranslation, practicePairs, toast],
   );
 
   return (
@@ -63,7 +63,7 @@ export function Practice({ practicePairs }: { practicePairs: PracticePair[] }) {
           Need more practice
         </Button>
         <Button variant="destructive" onClick={() => onSubmit("hard")}>
-          I don't know
+          {"I don't know"}
         </Button>
       </div>
     </>
