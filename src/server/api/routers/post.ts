@@ -21,10 +21,12 @@ export const wordRouter = createTRPCRouter({
       });
     }),
   getAllByUserId: publicProcedure
-    .input(z.string().min(1))
+    .input(z.string().min(1).optional())
     .query(async ({ ctx, input }) => {
-      return await ctx.db.query.word.findMany({
-        where: eq(word.userId, input),
-      });
+      if (input)
+        return await ctx.db.query.word.findMany({
+          where: eq(word.userId, input),
+        });
+      else return await ctx.db.query.word.findMany();
     }),
 });
