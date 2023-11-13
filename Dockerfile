@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-RUN apt install -y npm
+RUN apt-get update && apt-get install -y --no-install-recommends nodejs npm
 
 RUN npm install -g bun
 
