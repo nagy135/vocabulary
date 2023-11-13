@@ -7,20 +7,21 @@ import path from "path";
 await import("./src/env.mjs");
 
 /** @type {import("next").NextConfig} */
-const config = {
-  webpack: (config, { nextRuntime }) => {
-    // Undocumented property of next 12.
-    if (nextRuntime !== "nodejs") return config;
-    return {
-      ...config,
-      entry() {
-        return config.entry().then((entry) => ({
-          ...entry,
-          cli: path.resolve(process.cwd(), "lib/cli.ts"),
-        }));
-      },
-    };
-  },
-};
+const config = {};
+// const config = {
+//   webpack: (config, { nextRuntime }) => {
+//     // Undocumented property of next 12.
+//     if (nextRuntime !== "nodejs") return config;
+//     return {
+//       ...config,
+//       entry() {
+//         return config.entry().then((entry) => ({
+//           ...entry,
+//           cli: path.resolve(process.cwd(), "lib/cli.ts"),
+//         }));
+//       },
+//     };
+//   },
+// };
 
 export default config;
