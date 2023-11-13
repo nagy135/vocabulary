@@ -46,8 +46,8 @@ export function CreateWord() {
     resolver: zodResolver(FormSchema),
     mode: "onChange",
     defaultValues: {
-      name: "wissen",
-      translation: "vediet",
+      name: "",
+      translation: "",
     },
   });
 
