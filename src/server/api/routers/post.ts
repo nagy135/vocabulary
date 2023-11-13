@@ -21,13 +21,9 @@ export const wordRouter = createTRPCRouter({
       });
     }),
 
-  getAllByUserId: publicProcedure
-    .input(z.string().optional())
-    .query(({ ctx, input }) => {
-      if (input)
-        return ctx.db.query.word.findMany({
-          where: eq(word.userId, input),
-        });
-      else return ctx.db.query.word.findMany();
-    }),
+  getAllByUserId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
+    return ctx.db.query.word.findMany({
+      where: eq(word.userId, input),
+    });
+  }),
 });
