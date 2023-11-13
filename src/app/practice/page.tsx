@@ -17,6 +17,7 @@ export default async function PracticePage() {
         practicePairs={words.map((e) => ({
           name: e.name ?? "",
           translation: e.translation ?? "",
+          id: e.id,
         }))}
       />
     </main>

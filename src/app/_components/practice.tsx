@@ -12,16 +12,39 @@ function pickRandomElement<T>(array: T[]): T | undefined {
 
 export function Practice({ practicePairs }: { practicePairs: PracticePair[] }) {
   const [currentTranslation, setCurrentTranslation] = useState<
-    string | undefined
-  >(practicePairs[0]?.translation);
-  const known = useRef<string[]>([]);
+    PracticePair | undefined
+  >(practicePairs[0]);
+  const known = useRef<number[]>([]);
   const { toast } = useToast();
 
   const onSubmit = useCallback(
     (resolution: "easy" | "repeat" | "hard") => {
-      if (resolution === "easy") {
-        known.current.push(currentTranslation!);
+      if (!currentTranslation) {
+        alert("No translation to practice");
+        return;
       }
+      if (resolution === "easy") {
+        toast({
+          title: "Too easy, understood",
+          description: `it was: ${currentTranslation.name}`,
+        });
+        known.current.push(currentTranslation.id);
+      } else {
+        toast({
+          title: "Keep on practicing!",
+          description: `${currentTranslation.name}`,
+          variant: resolution === "hard" ? "destructive" : "default",
+        });
+      }
+
+      if (known.current.length === practicePairs.length) {
+        toast({
+          title: "YOU KNOW IT ALL!",
+        });
+        setCurrentTranslation(undefined);
+        return;
+      }
+
       let pair = pickRandomElement(practicePairs);
       if (!pair) {
         toast({
@@ -30,8 +53,9 @@ export function Practice({ practicePairs }: { practicePairs: PracticePair[] }) {
         return;
       }
       while (
-        known.current.includes(pair.translation) ||
-        pair.translation === currentTranslation
+        known.current.includes(pair.id) ||
+        (pair.id === currentTranslation.id &&
+          practicePairs.length - known.current.length > 1)
       ) {
         pair = pickRandomElement(practicePairs);
         if (!pair) {
@@ -41,7 +65,7 @@ export function Practice({ practicePairs }: { practicePairs: PracticePair[] }) {
           return;
         }
       }
-      setCurrentTranslation(pair.translation);
+      setCurrentTranslation(pair);
     },
     [currentTranslation, practicePairs, toast],
   );
@@ -53,7 +77,7 @@ export function Practice({ practicePairs }: { practicePairs: PracticePair[] }) {
           placeholder="My translation"
           className="text-center"
           readOnly
-          value={currentTranslation ?? ""}
+          value={currentTranslation?.translation ?? "YOU KNOW THEM ALL"}
           contentEditable={false}
         />
       </div>
