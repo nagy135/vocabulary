@@ -26,7 +26,7 @@ export function Practice({ practicePairs }: { practicePairs: PracticePair[] }) {
       if (resolution === "easy") {
         toast({
           title: "Too easy, understood",
-          description: `it was: ${currentTranslation.name}`,
+          description: `${currentTranslation.name}`,
         });
         known.current.push(currentTranslation.id);
       } else {
