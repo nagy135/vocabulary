@@ -3,22 +3,37 @@
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
-import { type PracticePair } from "~/types";
 import { useCallback, useRef, useState } from "react";
+import { SelectKnown, SelectWord } from "~/server/db/schema";
+import { Badge } from "./ui/badge";
+import { api } from "~/trpc/react";
+import { useUser } from "@clerk/nextjs";
 
 function pickRandomElement<T>(array: T[]): T | undefined {
   return array[Math.floor(Math.random() * array.length)];
 }
 
-export function Practice({ practicePairs }: { practicePairs: PracticePair[] }) {
+type Practice = {
+  words: Pick<SelectWord, "id" | "name" | "translation">[];
+  knowns: SelectKnown["id"][];
+};
+
+export function Practice({ words, knowns }: Practice) {
   const [currentTranslation, setCurrentTranslation] = useState<
-    PracticePair | undefined
-  >(practicePairs[0]);
+    (typeof words)[0] | undefined
+  >(words[0]);
   const [lastTranslation, setLastTranslation] = useState<
-    PracticePair | undefined
+    (typeof words)[0] | undefined
   >(undefined);
-  const known = useRef<Set<number>>(new Set());
+  const known = useRef<Set<number>>(new Set(knowns));
   const { toast } = useToast();
+  const { user } = useUser();
+
+  const updateKnown = api.known.create.useMutation({
+    onSuccess: (_data, { wordId }) => {
+      known.current.add(wordId);
+    },
+  });
 
   const revertLastChoice = useCallback(() => {
     setCurrentTranslation(lastTranslation);
@@ -45,7 +60,7 @@ export function Practice({ practicePairs }: { practicePairs: PracticePair[] }) {
           title: "Too easy, understood",
           description: `${currentTranslation.name} :: ${currentTranslation.translation}`,
         });
-        known.current.add(currentTranslation.id);
+        updateKnown.mutate({ wordId: currentTranslation.id, userId: user!.id });
       } else {
         toast({
           title: "Keep on practicing!",
@@ -54,7 +69,7 @@ export function Practice({ practicePairs }: { practicePairs: PracticePair[] }) {
         });
       }
 
-      if (known.current.size === practicePairs.length) {
+      if (known.current.size === words.length) {
         toast({
           title: "YOU KNOW IT ALL!",
         });
@@ -62,7 +77,7 @@ export function Practice({ practicePairs }: { practicePairs: PracticePair[] }) {
         return;
       }
 
-      let pair = pickRandomElement(practicePairs);
+      let pair = pickRandomElement(words);
       if (!pair) {
         toast({
           title: "No more pairs to practice",
@@ -72,9 +87,9 @@ export function Practice({ practicePairs }: { practicePairs: PracticePair[] }) {
       while (
         known.current.has(pair.id) ||
         (pair.id === currentTranslation.id &&
-          practicePairs.length - known.current.size > 1)
+          words.length - known.current.size > 1)
       ) {
-        pair = pickRandomElement(practicePairs);
+        pair = pickRandomElement(words);
         if (!pair) {
           toast({
             title: "No more pairs to practice",
@@ -84,7 +99,7 @@ export function Practice({ practicePairs }: { practicePairs: PracticePair[] }) {
       }
       setCurrentTranslation(pair);
     },
-    [currentTranslation, practicePairs, toast],
+    [currentTranslation, words, toast, user],
   );
 
   return (
@@ -112,6 +127,11 @@ export function Practice({ practicePairs }: { practicePairs: PracticePair[] }) {
             Go back to last
           </Button>
         </div>
+      </div>
+      <div className="absolute bottom-0 left-0 m-2">
+        <Badge variant="default" className="text-md">
+          {known.current.size}/{words.length}
+        </Badge>
       </div>
     </div>
   );
