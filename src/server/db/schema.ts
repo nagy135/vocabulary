@@ -1,7 +1,7 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   bigint,
   index,
@@ -34,3 +34,26 @@ export const word = mysqlTable(
     nameIndex: index("name_idx").on(example.name),
   }),
 );
+
+export type SelectWord = typeof word.$inferSelect;
+export type InsertWord = typeof word.$inferInsert;
+
+export const known = mysqlTable("known", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  userId: varchar("user_id", { length: 256 }).notNull(),
+  wordId: bigint("word_id", { mode: "number" }).notNull(),
+  createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
+export const knownRelations = relations(known, ({ one }) => ({
+  word: one(word, {
+    fields: [known.wordId],
+    references: [word.id],
+  }),
+}));
+
+export type SelectKnown = typeof known.$inferSelect;
+export type InsertKnown = typeof known.$inferInsert;
