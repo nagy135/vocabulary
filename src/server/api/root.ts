@@ -1,4 +1,5 @@
 import { wordRouter } from "~/server/api/routers/post";
+import { knownRouter } from "~/server/api/routers/known";
 import { createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -8,6 +9,7 @@ import { createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   word: wordRouter,
+  known: knownRouter,
 });
 
 // export type definition of API
