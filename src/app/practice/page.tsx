@@ -20,7 +20,7 @@ export default async function PracticePage() {
           translation: e.translation ?? "",
           id: e.id,
         }))}
-        knowns={knowns.map((e) => e.id)}
+        knowns={knowns.map((e) => e.wordId)}
       />
     </main>
   );

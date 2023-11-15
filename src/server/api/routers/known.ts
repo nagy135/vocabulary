@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
@@ -22,5 +22,17 @@ export const knownRouter = createTRPCRouter({
         userId,
         wordId,
       });
+    }),
+  delete: publicProcedure
+    .input(
+      z.object({
+        userId: z.string().min(1),
+        wordId: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input: { userId, wordId } }) => {
+      return ctx.db
+        .delete(known)
+        .where(and(eq(known.userId, userId), eq(known.wordId, wordId)));
     }),
 });

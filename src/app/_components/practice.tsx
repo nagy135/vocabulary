@@ -3,7 +3,7 @@
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { SelectKnown, SelectWord } from "~/server/db/schema";
 import { Badge } from "./ui/badge";
 import { api } from "~/trpc/react";
@@ -25,20 +25,32 @@ export function Practice({ words, knowns }: Practice) {
   const [lastTranslation, setLastTranslation] = useState<
     (typeof words)[0] | undefined
   >(undefined);
-  const known = useRef<Set<number>>(new Set(knowns));
+  const [known, setKnown] = useState<Set<number>>(new Set(knowns));
   const { toast } = useToast();
   const { user } = useUser();
 
   const updateKnown = api.known.create.useMutation({
     onSuccess: (_data, { wordId }) => {
-      known.current.add(wordId);
+      setKnown((e) => {
+        e.add(wordId);
+        return e;
+      });
+    },
+  });
+
+  const deleteKnown = api.known.delete.useMutation({
+    onSuccess: (_data, { wordId }) => {
+      setKnown((e) => {
+        e.delete(wordId);
+        return e;
+      });
     },
   });
 
   const revertLastChoice = useCallback(() => {
     setCurrentTranslation(lastTranslation);
-    if (known.current.has(lastTranslation!.id)) {
-      known.current.delete(lastTranslation!.id);
+    if (known.has(lastTranslation!.id)) {
+      deleteKnown.mutate({ wordId: lastTranslation!.id, userId: user!.id });
     }
     setLastTranslation(undefined);
     toast({
@@ -46,7 +58,7 @@ export function Practice({ words, knowns }: Practice) {
       description: `${lastTranslation?.name} :: ${lastTranslation?.translation}`,
       variant: "default",
     });
-  }, [lastTranslation, currentTranslation]);
+  }, [lastTranslation, currentTranslation, known]);
 
   const onSubmit = useCallback(
     (resolution: "easy" | "repeat") => {
@@ -69,7 +81,7 @@ export function Practice({ words, knowns }: Practice) {
         });
       }
 
-      if (known.current.size === words.length) {
+      if (known.size === words.length) {
         toast({
           title: "YOU KNOW IT ALL!",
         });
@@ -85,9 +97,8 @@ export function Practice({ words, knowns }: Practice) {
         return;
       }
       while (
-        known.current.has(pair.id) ||
-        (pair.id === currentTranslation.id &&
-          words.length - known.current.size > 1)
+        known.has(pair.id) ||
+        (pair.id === currentTranslation.id && words.length - known.size > 1)
       ) {
         pair = pickRandomElement(words);
         if (!pair) {
@@ -99,7 +110,7 @@ export function Practice({ words, knowns }: Practice) {
       }
       setCurrentTranslation(pair);
     },
-    [currentTranslation, words, toast, user],
+    [currentTranslation, words, toast, user, known],
   );
 
   return (
@@ -130,7 +141,7 @@ export function Practice({ words, knowns }: Practice) {
       </div>
       <div className="absolute bottom-0 left-0 m-2">
         <Badge variant="default" className="text-md">
-          {known.current.size}/{words.length}
+          {known.size}/{words.length}
         </Badge>
       </div>
     </div>
