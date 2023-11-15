@@ -21,7 +21,7 @@ type Practice = {
 export function Practice({ words, knowns }: Practice) {
   const [currentTranslation, setCurrentTranslation] = useState<
     (typeof words)[0] | undefined
-  >(words[0]);
+  >(pickRandomElement(words));
   const [lastTranslation, setLastTranslation] = useState<
     (typeof words)[0] | undefined
   >(undefined);
