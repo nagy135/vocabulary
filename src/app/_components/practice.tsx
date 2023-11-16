@@ -30,6 +30,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
     (typeof words)[0] | undefined
   >(undefined);
   const [known, setKnown] = useState<number[]>([]);
+  const [revertBlocked, setRevertBlocked] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
@@ -41,14 +42,18 @@ export function Practice({ words, knowns, allWords }: Practice) {
   }, [knowns, words]);
 
   const updateKnown = api.known.create.useMutation({
+    onMutate: () => setRevertBlocked(true),
     onSuccess: (_data, { wordId }) => {
       setKnown((e) => [...e, wordId]);
+      setRevertBlocked(false);
     },
   });
 
   const deleteKnown = api.known.delete.useMutation({
+    onMutate: () => setRevertBlocked(true),
     onSuccess: (_data, { wordId }) => {
       setKnown((e) => e.filter((item) => item !== wordId));
+      setRevertBlocked(false);
     },
   });
 
@@ -136,7 +141,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
         <div className="flex gap-2 md:flex-col">
           <Button onClick={() => onSubmit("easy")}>Easy, skip this</Button>
           <Button
-            disabled={!lastTranslation}
+            disabled={!lastTranslation || revertBlocked}
             variant="destructive"
             onClick={() => revertLastChoice()}
           >
