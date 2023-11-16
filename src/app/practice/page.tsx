@@ -1,6 +1,6 @@
 import { Page } from "~/enums";
 import Navigation from "../_components/navigation";
-import { Practice } from "../_components/practice";
+import { Practice } from "../_components/practice/practice";
 import { currentUser } from "@clerk/nextjs";
 import { api } from "~/trpc/server";
 import { Suspense } from "react";

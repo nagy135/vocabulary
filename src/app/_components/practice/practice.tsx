@@ -1,15 +1,25 @@
 "use client";
 
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { useToast } from "./ui/use-toast";
-import { type CSSProperties, useCallback, useEffect, useState } from "react";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { useToast } from "../ui/use-toast";
+import { useCallback, useEffect, useState } from "react";
 import { type SelectKnown, type SelectWord } from "~/server/db/schema";
-import { Badge } from "./ui/badge";
+import { Badge } from "../ui/badge";
 import { api } from "~/trpc/react";
 import { useUser } from "@clerk/nextjs";
-import { Progress } from "./ui/progress";
+import { Progress } from "../ui/progress";
 import { usePathname, useRouter } from "next/navigation";
+import {
+  REVEAL_TIMEOUT,
+  ROTATE_TIMEOUT,
+  RevealPosition,
+  RotationPosition,
+  revealInitStyle,
+  revealMiddleStyle,
+  rotationInitStyle,
+  rotationMiddleStyle,
+} from "./animations";
 
 function pickRandomElement<T>(array: T[]): T | undefined {
   return array[Math.floor(Math.random() * array.length)];
@@ -20,41 +30,6 @@ type Practice = {
   knowns: SelectKnown["id"][];
   allWords: boolean;
 };
-
-enum RotationPosition {
-  init = 1,
-  middle,
-}
-
-const rotationInitStyle: CSSProperties = {
-  transform: "rotate3d(0,1,0, 0deg)",
-  transition: "transform 0.5s ease-in-out",
-};
-
-const rotationMiddleStyle: CSSProperties = {
-  transform: "rotate3d(0,1,0, 90deg)",
-  transition: "transform 0.5s ease-in-out",
-};
-
-enum RevealPosition {
-  init = 1,
-  middle,
-}
-
-const revealInitStyle: CSSProperties = {
-  opacity: 0,
-  transform: "translateY(80px)",
-  transition: "opacity 0.5s, transform 0.5s ease-in-out",
-};
-
-const revealMiddleStyle: CSSProperties = {
-  opacity: 1,
-  transform: "translateY(-10px)",
-  transition: "opacity 0.5s, transform 0.5s ease-in-out",
-};
-
-const ROTATE_TIMEOUT = 500;
-const REVEAL_TIMEOUT = 1500;
 
 export function Practice({ words, knowns, allWords }: Practice) {
   const [currentTranslation, setCurrentTranslation] = useState<
