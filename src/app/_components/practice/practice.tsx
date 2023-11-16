@@ -15,10 +15,8 @@ import {
   ROTATE_TIMEOUT,
   RevealPosition,
   RotationPosition,
-  revealInitStyle,
-  revealMiddleStyle,
-  rotationInitStyle,
-  rotationMiddleStyle,
+  revealStyle,
+  rotationStyle,
 } from "./animations";
 
 function pickRandomElement<T>(array: T[]): T | undefined {
@@ -148,11 +146,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
         <Input
           placeholder=""
           className="h-20 text-center text-xl"
-          style={
-            revealPosition === RevealPosition.init
-              ? revealInitStyle
-              : revealMiddleStyle
-          }
+          style={revealStyle[revealPosition]}
           readOnly
           value={currentTranslation?.name ?? "-"}
           contentEditable={false}
@@ -160,11 +154,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
         <Input
           placeholder="My translation"
           className="h-20 text-center text-xl"
-          style={
-            rotationPosition === RotationPosition.middle
-              ? rotationMiddleStyle
-              : rotationInitStyle
-          }
+          style={rotationStyle[rotationPosition]}
           readOnly
           value={currentTranslation?.translation ?? "-"}
           contentEditable={false}
