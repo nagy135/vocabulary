@@ -3,7 +3,7 @@
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
-import { CSSProperties, useCallback, useEffect, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useState } from "react";
 import { type SelectKnown, type SelectWord } from "~/server/db/schema";
 import { Badge } from "./ui/badge";
 import { api } from "~/trpc/react";
@@ -36,6 +36,26 @@ const rotationMiddleStyle: CSSProperties = {
   transition: "transform 0.5s ease-in-out",
 };
 
+enum RevealPosition {
+  init = 1,
+  middle,
+}
+
+const revealInitStyle: CSSProperties = {
+  opacity: 0,
+  transform: "translateY(80px)",
+  transition: "opacity 0.5s, transform 0.5s ease-in-out",
+};
+
+const revealMiddleStyle: CSSProperties = {
+  opacity: 1,
+  transform: "translateY(-10px)",
+  transition: "opacity 0.5s, transform 0.5s ease-in-out",
+};
+
+const ROTATE_TIMEOUT = 500;
+const REVEAL_TIMEOUT = 1500;
+
 export function Practice({ words, knowns, allWords }: Practice) {
   const [currentTranslation, setCurrentTranslation] = useState<
     (typeof words)[0] | undefined
@@ -50,6 +70,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
   const [rotationPosition, setRotationPosition] = useState(
     RotationPosition.init,
   );
+  const [revealPosition, setRevealPosition] = useState(RevealPosition.init);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -103,14 +124,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
           description: `${currentTranslation.name} :: ${currentTranslation.translation}`,
         });
         updateKnown.mutate({ wordId: currentTranslation.id, userId: user!.id });
-      } else {
-        toast({
-          title: "Keep on practicing!",
-          description: `${currentTranslation.name} :: ${currentTranslation.translation}`,
-          variant: "destructive",
-        });
       }
-
       if (known.length === words.length) {
         toast({
           title: "YOU KNOW IT ALL!",
@@ -138,11 +152,17 @@ export function Practice({ words, knowns, allWords }: Practice) {
           return;
         }
       }
-      setRotationPosition(RotationPosition.middle);
+      setRevealPosition(RevealPosition.middle);
       setTimeout(() => {
-        setCurrentTranslation(pair);
-        setRotationPosition(RotationPosition.init);
-      }, 500);
+        setRevealPosition(RevealPosition.init);
+        setTimeout(() => {
+          setRotationPosition(RotationPosition.middle);
+          setTimeout(() => {
+            setCurrentTranslation(pair);
+            setRotationPosition(RotationPosition.init);
+          }, ROTATE_TIMEOUT);
+        }, ROTATE_TIMEOUT);
+      }, REVEAL_TIMEOUT);
     },
     [currentTranslation, words, toast, user, known, updateKnown],
   );
@@ -150,6 +170,18 @@ export function Practice({ words, knowns, allWords }: Practice) {
   return (
     <div className="flex flex-col items-stretch">
       <div className="my-5">
+        <Input
+          placeholder=""
+          className="h-20 text-center text-xl"
+          style={
+            revealPosition === RevealPosition.init
+              ? revealInitStyle
+              : revealMiddleStyle
+          }
+          readOnly
+          value={currentTranslation?.name ?? "-"}
+          contentEditable={false}
+        />
         <Input
           placeholder="My translation"
           className="h-20 text-center text-xl"
