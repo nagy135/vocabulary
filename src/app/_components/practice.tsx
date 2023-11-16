@@ -4,7 +4,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
 import { useCallback, useState } from "react";
-import { SelectKnown, SelectWord } from "~/server/db/schema";
+import { type SelectKnown, type SelectWord } from "~/server/db/schema";
 import { Badge } from "./ui/badge";
 import { api } from "~/trpc/react";
 import { useUser } from "@clerk/nextjs";
@@ -64,7 +64,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
       description: `${lastTranslation?.name} :: ${lastTranslation?.translation}`,
       variant: "default",
     });
-  }, [lastTranslation, currentTranslation, known]);
+  }, [lastTranslation, known, deleteKnown, toast, user]);
 
   const onSubmit = useCallback(
     (resolution: "easy" | "repeat") => {
@@ -116,7 +116,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
       }
       setCurrentTranslation(pair);
     },
-    [currentTranslation, words, toast, user, known],
+    [currentTranslation, words, toast, user, known, updateKnown],
   );
 
   return (

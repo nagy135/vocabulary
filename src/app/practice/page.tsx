@@ -7,7 +7,7 @@ import { api } from "~/trpc/server";
 export default async function PracticePage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Record<string, string | string[] | undefined>;
 }) {
   const user = await currentUser();
   if (!user) return <div>Not logged in</div>;
