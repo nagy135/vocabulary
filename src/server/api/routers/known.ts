@@ -2,12 +2,23 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { known } from "~/server/db/schema";
+import { known, word } from "~/server/db/schema";
 
 export const knownRouter = createTRPCRouter({
+  getAll: publicProcedure.input(z.string()).query(({ ctx, input }) => {
+    return ctx.db.query.known.findMany({
+      where: (known, { eq }) => eq(known.userId, input),
+    });
+  }),
   getAllByUserId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
     return ctx.db.query.known.findMany({
-      where: eq(known.userId, input),
+      where: (known, { eq }) => eq(known.userId, input),
+      with: {
+        word: {
+          // @ts-ignore
+          where: eq(word.userId, input),
+        },
+      },
     });
   }),
   create: publicProcedure

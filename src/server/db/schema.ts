@@ -36,6 +36,10 @@ export const word = mysqlTable(
   }),
 );
 
+export const wordRelations = relations(word, ({ many }) => ({
+  knowns: many(known),
+}));
+
 export type SelectWord = typeof word.$inferSelect;
 export type InsertWord = typeof word.$inferInsert;
 

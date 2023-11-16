@@ -3,7 +3,7 @@
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { type SelectKnown, type SelectWord } from "~/server/db/schema";
 import { Badge } from "./ui/badge";
 import { api } from "~/trpc/react";
@@ -25,37 +25,36 @@ export function Practice({ words, knowns, allWords }: Practice) {
   const [currentTranslation, setCurrentTranslation] = useState<
     (typeof words)[0] | undefined
     // TODO: this can pick known word as well
-  >(pickRandomElement(words));
+  >(undefined);
   const [lastTranslation, setLastTranslation] = useState<
     (typeof words)[0] | undefined
   >(undefined);
-  const [known, setKnown] = useState<Set<number>>(new Set(knowns));
+  const [known, setKnown] = useState<number[]>([]);
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
   const { user } = useUser();
 
+  useEffect(() => {
+    setCurrentTranslation(pickRandomElement(words));
+    setKnown(knowns);
+  }, [knowns, words]);
+
   const updateKnown = api.known.create.useMutation({
     onSuccess: (_data, { wordId }) => {
-      setKnown((e) => {
-        e.add(wordId);
-        return e;
-      });
+      setKnown((e) => [...e, wordId]);
     },
   });
 
   const deleteKnown = api.known.delete.useMutation({
     onSuccess: (_data, { wordId }) => {
-      setKnown((e) => {
-        e.delete(wordId);
-        return e;
-      });
+      setKnown((e) => e.filter((item) => item !== wordId));
     },
   });
 
   const revertLastChoice = useCallback(() => {
     setCurrentTranslation(lastTranslation);
-    if (known.has(lastTranslation!.id)) {
+    if (known.includes(lastTranslation!.id)) {
       deleteKnown.mutate({ wordId: lastTranslation!.id, userId: user!.id });
     }
     setLastTranslation(undefined);
@@ -87,7 +86,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
         });
       }
 
-      if (known.size === words.length) {
+      if (known.length === words.length) {
         toast({
           title: "YOU KNOW IT ALL!",
         });
@@ -103,8 +102,8 @@ export function Practice({ words, knowns, allWords }: Practice) {
         return;
       }
       while (
-        known.has(pair.id) ||
-        (pair.id === currentTranslation.id && words.length - known.size > 1)
+        known.includes(pair.id) ||
+        (pair.id === currentTranslation.id && words.length - known.length > 1)
       ) {
         pair = pickRandomElement(words);
         if (!pair) {
@@ -126,7 +125,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
           placeholder="My translation"
           className="text-center"
           readOnly
-          value={currentTranslation?.translation ?? "YOU KNOW THEM ALL"}
+          value={currentTranslation?.translation ?? "-"}
           contentEditable={false}
         />
       </div>
@@ -147,15 +146,15 @@ export function Practice({ words, knowns, allWords }: Practice) {
       </div>
       <div className="absolute bottom-0 left-0 flex w-full items-center gap-5 p-2">
         <Badge variant="default" className="text-md">
-          {known.size}/{words.length}
+          {known.length}/{words.length}
         </Badge>
-        <Progress value={(known.size / words.length) * 100} />
+        <Progress value={(known.length / words.length) * 100} />
         <Button
           onClick={() => {
             if (allWords) {
-              router.push(pathname);
+              router.replace(pathname);
             } else {
-              router.push(
+              router.replace(
                 pathname +
                   "?" +
                   new URLSearchParams({ all: "true" }).toString(),
