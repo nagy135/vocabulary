@@ -3,7 +3,7 @@
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
-import { useCallback, useEffect, useState } from "react";
+import { CSSProperties, useCallback, useEffect, useState } from "react";
 import { type SelectKnown, type SelectWord } from "~/server/db/schema";
 import { Badge } from "./ui/badge";
 import { api } from "~/trpc/react";
@@ -21,6 +21,22 @@ type Practice = {
   allWords: boolean;
 };
 
+enum RotationPosition {
+  init = 1,
+  middle,
+  end,
+}
+
+const rotationMiddleStyle: CSSProperties = {
+  transform: "rotate3d(0,1,0, 90deg)",
+  transition: "transform 0.5s ease-in-out",
+};
+
+const rotationEndStyle: CSSProperties = {
+  transform: "rotate3d(0,1,0, 0deg)",
+  transition: "transform 0.5s ease-in-out",
+};
+
 export function Practice({ words, knowns, allWords }: Practice) {
   const [currentTranslation, setCurrentTranslation] = useState<
     (typeof words)[0] | undefined
@@ -31,6 +47,11 @@ export function Practice({ words, knowns, allWords }: Practice) {
   >(undefined);
   const [known, setKnown] = useState<number[]>([]);
   const [revertBlocked, setRevertBlocked] = useState(false);
+
+  const [rotationPosition, setRotationPosition] = useState(
+    RotationPosition.init,
+  );
+
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
@@ -118,17 +139,28 @@ export function Practice({ words, knowns, allWords }: Practice) {
           return;
         }
       }
-      setCurrentTranslation(pair);
+      setRotationPosition(RotationPosition.middle);
+      setTimeout(() => {
+        setCurrentTranslation(pair);
+        setRotationPosition(RotationPosition.end);
+      }, 500);
     },
     [currentTranslation, words, toast, user, known, updateKnown],
   );
 
   return (
     <div className="flex flex-col items-stretch">
-      <div className="my-2">
+      <div className="my-5">
         <Input
           placeholder="My translation"
-          className="text-center"
+          className="h-20 text-center text-xl"
+          style={
+            rotationPosition === RotationPosition.middle
+              ? rotationMiddleStyle
+              : rotationPosition === RotationPosition.end
+              ? rotationEndStyle
+              : undefined
+          }
           readOnly
           value={currentTranslation?.translation ?? "-"}
           contentEditable={false}
