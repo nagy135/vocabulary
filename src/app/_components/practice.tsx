@@ -24,16 +24,15 @@ type Practice = {
 enum RotationPosition {
   init = 1,
   middle,
-  end,
 }
 
-const rotationMiddleStyle: CSSProperties = {
-  transform: "rotate3d(0,1,0, 90deg)",
+const rotationInitStyle: CSSProperties = {
+  transform: "rotate3d(0,1,0, 0deg)",
   transition: "transform 0.5s ease-in-out",
 };
 
-const rotationEndStyle: CSSProperties = {
-  transform: "rotate3d(0,1,0, 0deg)",
+const rotationMiddleStyle: CSSProperties = {
+  transform: "rotate3d(0,1,0, 90deg)",
   transition: "transform 0.5s ease-in-out",
 };
 
@@ -142,7 +141,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
       setRotationPosition(RotationPosition.middle);
       setTimeout(() => {
         setCurrentTranslation(pair);
-        setRotationPosition(RotationPosition.end);
+        setRotationPosition(RotationPosition.init);
       }, 500);
     },
     [currentTranslation, words, toast, user, known, updateKnown],
@@ -157,9 +156,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
           style={
             rotationPosition === RotationPosition.middle
               ? rotationMiddleStyle
-              : rotationPosition === RotationPosition.end
-              ? rotationEndStyle
-              : undefined
+              : rotationInitStyle
           }
           readOnly
           value={currentTranslation?.translation ?? "-"}
