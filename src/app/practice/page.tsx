@@ -3,8 +3,6 @@ import Navigation from "../_components/navigation";
 import { Practice } from "../_components/practice";
 import { currentUser } from "@clerk/nextjs";
 import { api } from "~/trpc/server";
-import Link from "next/link";
-import { Button } from "../_components/ui/button";
 
 export default async function PracticePage({
   searchParams,
@@ -30,12 +28,8 @@ export default async function PracticePage({
           id: e.id,
         }))}
         knowns={knowns.map((e) => e.wordId)}
+        allWords={allWords}
       />
-      <Button variant="outline" className="absolute bottom-0 right-0 m-2">
-        <Link href={`/practice${allWords ? "" : "?all=true"}`}>
-          {allWords ? "My words" : "All words"}
-        </Link>
-      </Button>
     </main>
   );
 }

@@ -8,6 +8,8 @@ import { SelectKnown, SelectWord } from "~/server/db/schema";
 import { Badge } from "./ui/badge";
 import { api } from "~/trpc/react";
 import { useUser } from "@clerk/nextjs";
+import { Progress } from "./ui/progress";
+import { usePathname, useRouter } from "next/navigation";
 
 function pickRandomElement<T>(array: T[]): T | undefined {
   return array[Math.floor(Math.random() * array.length)];
@@ -16,9 +18,10 @@ function pickRandomElement<T>(array: T[]): T | undefined {
 type Practice = {
   words: Pick<SelectWord, "id" | "name" | "translation">[];
   knowns: SelectKnown["id"][];
+  allWords: boolean;
 };
 
-export function Practice({ words, knowns }: Practice) {
+export function Practice({ words, knowns, allWords }: Practice) {
   const [currentTranslation, setCurrentTranslation] = useState<
     (typeof words)[0] | undefined
     // TODO: this can pick known word as well
@@ -27,6 +30,8 @@ export function Practice({ words, knowns }: Practice) {
     (typeof words)[0] | undefined
   >(undefined);
   const [known, setKnown] = useState<Set<number>>(new Set(knowns));
+  const router = useRouter();
+  const pathname = usePathname();
   const { toast } = useToast();
   const { user } = useUser();
 
@@ -140,10 +145,27 @@ export function Practice({ words, knowns }: Practice) {
           </Button>
         </div>
       </div>
-      <div className="absolute bottom-0 left-0 m-2">
+      <div className="absolute bottom-0 left-0 flex w-full items-center gap-5 p-2">
         <Badge variant="default" className="text-md">
           {known.size}/{words.length}
         </Badge>
+        <Progress value={(known.size / words.length) * 100} />
+        <Button
+          onClick={() => {
+            if (allWords) {
+              router.push(pathname);
+            } else {
+              router.push(
+                pathname +
+                  "?" +
+                  new URLSearchParams({ all: "true" }).toString(),
+              );
+            }
+          }}
+          variant="outline"
+        >
+          {allWords ? "My words" : "All words"}
+        </Button>
       </div>
     </div>
   );
