@@ -32,6 +32,7 @@ export const word = mysqlTable(
   },
   (example) => ({
     nameIndex: index("name_idx").on(example.name),
+    userIdIndex: index("user_id_idx").on(example.userId),
   }),
 );
 
