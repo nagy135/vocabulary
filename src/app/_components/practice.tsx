@@ -194,7 +194,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
         <Button variant="secondary" onClick={() => onSubmit("repeat")}>
           Need more practice
         </Button>
-        <div className="flex gap-2 md:flex-col">
+        <div className="flex justify-between gap-2 md:flex-col">
           <Button onClick={() => onSubmit("easy")}>Easy, skip this</Button>
           <Button
             disabled={!lastTranslation || revertBlocked}
