@@ -11,7 +11,9 @@ import {
 import { KnownRecord } from "./known-list";
 import { Checkbox } from "../ui/checkbox";
 import { Button } from "../ui/button";
-export const columns: ColumnDef<KnownRecord>[] = [
+export const columns = (
+  actionCall: (knownId: number) => void,
+): ColumnDef<KnownRecord>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -81,14 +83,14 @@ export const columns: ColumnDef<KnownRecord>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem
-              onClick={() =>
-                navigator.clipboard.writeText(knownRecord.wordTranslation ?? "")
-              }
+              onClick={() => {
+                actionCall(knownRecord.knownId);
+              }}
             >
               Delete
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Edit</DropdownMenuItem>
+            <DropdownMenuItem disabled={true}>Edit</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

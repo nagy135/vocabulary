@@ -52,4 +52,9 @@ export const knownRouter = createTRPCRouter({
         .delete(known)
         .where(and(eq(known.userId, userId), eq(known.wordId, wordId)));
     }),
+  deleteById: publicProcedure
+    .input(z.number())
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.delete(known).where(eq(known.id, input));
+    }),
 });

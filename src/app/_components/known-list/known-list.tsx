@@ -36,6 +36,10 @@ import { useEffect, useState } from "react";
 import { columns } from "./table-columns";
 import useScreenWidth from "~/app/hooks/use-screen-width";
 import { AnimationPosition, useAnimation } from "~/animation";
+import { api } from "~/trpc/react";
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { useToast } from "../ui/use-toast";
 
 export type KnownRecord = {
   knownId: SelectKnown["id"];
@@ -52,6 +56,8 @@ export default function KnownList({ knowns }: KnownList) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const router = useRouter();
+  const { toast } = useToast();
 
   const screenWidth = useScreenWidth();
   const { setPosition, style } = useAnimation({
@@ -66,9 +72,23 @@ export default function KnownList({ knowns }: KnownList) {
     else setPosition(AnimationPosition.init);
   }, [rowSelection]);
 
+  const deleteKnown = api.known.deleteById.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Deleted known word",
+        variant: "destructive",
+      });
+      router.refresh();
+    },
+  });
+
+  const deleteCall = (knownId: number) => {
+    deleteKnown.mutate(knownId);
+  };
+
   const table = useReactTable({
     data: knowns,
-    columns: columns,
+    columns: columns(deleteCall),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
