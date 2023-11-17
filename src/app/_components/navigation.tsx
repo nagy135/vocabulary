@@ -43,7 +43,9 @@ export default function Navigation({ currentPage }: { currentPage: Page }) {
           key={`navigation-${i}`}
           variant={linksToShow[e].variant ?? "default"}
         >
-          <Link href={pageData[e].url}>{pageData[e].label}</Link>
+          <Link prefetch={false} href={pageData[e].url}>
+            {pageData[e].label}
+          </Link>
         </Button>
       ))}
     </div>
