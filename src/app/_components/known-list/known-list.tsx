@@ -33,13 +33,9 @@ import {
 
 import { type SelectKnown, type SelectWord } from "~/server/db/schema";
 import { useEffect, useState } from "react";
-import {
-  RevealPosition,
-  revealStyleHorizontal,
-  revealStyleVertical,
-} from "./animations";
 import { columns } from "./table-columns";
 import useScreenWidth from "~/app/hooks/use-screen-width";
+import { AnimationPosition, useAnimation } from "~/animation";
 
 export type KnownRecord = {
   knownId: SelectKnown["id"];
@@ -57,15 +53,19 @@ export default function KnownList({ knowns }: KnownList) {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
-  const [revealPosition, setRevealPosition] = useState(RevealPosition.init);
+  const screenWidth = useScreenWidth();
+  const { setPosition, style } = useAnimation({
+    variety: "reveal-hv",
+    offset: { init: 49, middle: -10 },
+    timeout: 500,
+    orientation: screenWidth && screenWidth > 768 ? "horizontal" : "vertical",
+  });
 
   useEffect(() => {
-    if (Object.keys(rowSelection).length)
-      setRevealPosition(RevealPosition.middle);
-    else setRevealPosition(RevealPosition.init);
+    if (Object.keys(rowSelection).length) setPosition(AnimationPosition.middle);
+    else setPosition(AnimationPosition.init);
   }, [rowSelection]);
 
-  const screenWidth = useScreenWidth();
   const table = useReactTable({
     data: knowns,
     columns: columns,
@@ -107,11 +107,7 @@ export default function KnownList({ knowns }: KnownList) {
             onClick={() => alert("not implemented")}
             variant="destructive"
             className="ml-auto"
-            style={
-              screenWidth && screenWidth > 768
-                ? revealStyleHorizontal[revealPosition]
-                : revealStyleVertical[revealPosition]
-            }
+            style={style}
           >
             Delete selected
           </Button>

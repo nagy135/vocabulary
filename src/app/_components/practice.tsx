@@ -1,23 +1,16 @@
 "use client";
 
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { useToast } from "../ui/use-toast";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { useToast } from "./ui/use-toast";
 import { useCallback, useEffect, useState } from "react";
 import { type SelectKnown, type SelectWord } from "~/server/db/schema";
-import { Badge } from "../ui/badge";
+import { Badge } from "./ui/badge";
 import { api } from "~/trpc/react";
 import { useUser } from "@clerk/nextjs";
-import { Progress } from "../ui/progress";
+import { Progress } from "./ui/progress";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  REVEAL_TIMEOUT,
-  ROTATE_TIMEOUT,
-  RevealPosition,
-  RotationPosition,
-  revealStyle,
-  rotationStyle,
-} from "./animations";
+import { AnimationPosition, useAnimation } from "~/animation";
 
 function pickRandomElement<T>(array: T[]): T | undefined {
   return array[Math.floor(Math.random() * array.length)];
@@ -28,6 +21,8 @@ type Practice = {
   knowns: SelectKnown["id"][];
   allWords: boolean;
 };
+
+const REVEAL_TIMEOUT = 1500;
 
 export function Practice({ words, knowns, allWords }: Practice) {
   const [currentTranslation, setCurrentTranslation] = useState<
@@ -40,10 +35,20 @@ export function Practice({ words, knowns, allWords }: Practice) {
   const [known, setKnown] = useState<number[]>([]);
   const [revertBlocked, setRevertBlocked] = useState(false);
 
-  const [rotationPosition, setRotationPosition] = useState(
-    RotationPosition.init,
-  );
-  const [revealPosition, setRevealPosition] = useState(RevealPosition.init);
+  const {
+    setPosition: setRotationPosition,
+    style: rotationStyle,
+    timeout: rotationTimeout,
+  } = useAnimation({
+    variety: "rotate",
+    offset: { init: 0, middle: 90 },
+    timeout: 500,
+  });
+  const { setPosition: setRevealPosition, style: revealStyle } = useAnimation({
+    variety: "reveal-y",
+    offset: { init: 80, middle: -10 },
+    timeout: 500,
+  });
 
   const router = useRouter();
   const pathname = usePathname();
@@ -125,16 +130,16 @@ export function Practice({ words, knowns, allWords }: Practice) {
           return;
         }
       }
-      setRevealPosition(RevealPosition.middle);
+      setRevealPosition(AnimationPosition.middle);
       setTimeout(() => {
-        setRevealPosition(RevealPosition.init);
+        setRevealPosition(AnimationPosition.init);
         setTimeout(() => {
-          setRotationPosition(RotationPosition.middle);
+          setRotationPosition(AnimationPosition.middle);
           setTimeout(() => {
             setCurrentTranslation(pair);
-            setRotationPosition(RotationPosition.init);
-          }, ROTATE_TIMEOUT);
-        }, ROTATE_TIMEOUT);
+            setRotationPosition(AnimationPosition.init);
+          }, rotationTimeout);
+        }, rotationTimeout);
       }, REVEAL_TIMEOUT);
     },
     [currentTranslation, words, toast, user, known, updateKnown],
@@ -146,7 +151,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
         <Input
           placeholder=""
           className="h-20 text-center text-xl"
-          style={revealStyle[revealPosition]}
+          style={revealStyle}
           readOnly
           value={currentTranslation?.name ?? "-"}
           contentEditable={false}
@@ -154,7 +159,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
         <Input
           placeholder="My translation"
           className="h-20 text-center text-xl"
-          style={rotationStyle[rotationPosition]}
+          style={rotationStyle}
           readOnly
           value={currentTranslation?.translation ?? "-"}
           contentEditable={false}
