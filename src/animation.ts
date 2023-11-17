@@ -10,7 +10,7 @@ export const useAnimation = ({
   timeout,
   orientation = "horizontal",
 }: {
-  variety: "rotate" | "reveal-y" | "reveal-vh" | "reveal-hv";
+  variety: "rotate" | "reveal-y" | "reveal-vh" | "reveal-hv" | "pulse";
   offset: { init: number; middle: number };
   timeout: number;
   orientation?: "horizontal" | "vertical";
@@ -76,6 +76,17 @@ export const useAnimation = ({
         transition: `opacity ${timeout / 1000}s, transform ${
           timeout / 1000
         }s ease-in-out`,
+      },
+    };
+  } else if (variety === "pulse") {
+    style = {
+      [AnimationPosition.init]: {
+        transform: `scale(${init})`,
+        transition: `transform ${timeout / 1000}s ease-in-out`,
+      },
+      [AnimationPosition.middle]: {
+        transform: `scale(${middle})`,
+        transition: `transform ${timeout / 1000}s ease-in-out`,
       },
     };
   } else {

@@ -51,6 +51,19 @@ export function Practice({ words, knowns, allWords }: Practice) {
     timeout: 250,
   });
 
+  const {
+    setPosition: setPulsePosition,
+    style: pulseStyle,
+    timeout: pulseTimeout,
+  } = useAnimation({
+    variety: "pulse",
+    offset: {
+      init: 1,
+      middle: 1.1,
+    },
+    timeout: 100,
+  });
+
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
@@ -89,6 +102,10 @@ export function Practice({ words, knowns, allWords }: Practice) {
       description: `${lastTranslation?.name} :: ${lastTranslation?.translation}`,
       variant: "default",
     });
+    setPulsePosition(AnimationPosition.middle);
+    setTimeout(() => {
+      setPulsePosition(AnimationPosition.init);
+    }, pulseTimeout);
   }, [lastTranslation, known, deleteKnown, toast, user]);
 
   const onSubmit = useCallback(
@@ -104,6 +121,10 @@ export function Practice({ words, knowns, allWords }: Practice) {
           description: `${currentTranslation.name} :: ${currentTranslation.translation}`,
         });
         updateKnown.mutate({ wordId: currentTranslation.id, userId: user!.id });
+        setPulsePosition(AnimationPosition.middle);
+        setTimeout(() => {
+          setPulsePosition(AnimationPosition.init);
+        }, pulseTimeout);
       }
       if (known.length === words.length) {
         toast({
@@ -188,7 +209,10 @@ export function Practice({ words, knowns, allWords }: Practice) {
         <Badge variant="default" className="text-md">
           {known.length}/{words.length}
         </Badge>
-        <Progress value={(known.length / words.length) * 100} />
+        <Progress
+          style={pulseStyle}
+          value={(known.length / words.length) * 100}
+        />
         <Button
           onClick={() => {
             if (allWords) {
