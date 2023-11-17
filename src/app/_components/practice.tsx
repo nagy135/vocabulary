@@ -3,7 +3,7 @@
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { type SelectKnown, type SelectWord } from "~/server/db/schema";
 import { Badge } from "./ui/badge";
 import { api } from "~/trpc/react";
@@ -22,7 +22,7 @@ type Practice = {
   allWords: boolean;
 };
 
-const REVEAL_TIMEOUT = 1500;
+const REVEAL_TIMEOUT = 1200;
 
 export function Practice({ words, knowns, allWords }: Practice) {
   const [currentTranslation, setCurrentTranslation] = useState<
@@ -34,6 +34,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
   >(undefined);
   const [known, setKnown] = useState<number[]>([]);
   const [revertBlocked, setRevertBlocked] = useState(false);
+  const abortDuringRevert = useRef(false);
 
   const {
     setPosition: setRotationPosition,
@@ -42,12 +43,12 @@ export function Practice({ words, knowns, allWords }: Practice) {
   } = useAnimation({
     variety: "rotate",
     offset: { init: 0, middle: 90 },
-    timeout: 500,
+    timeout: 230,
   });
   const { setPosition: setRevealPosition, style: revealStyle } = useAnimation({
     variety: "reveal-y",
     offset: { init: 80, middle: -10 },
-    timeout: 500,
+    timeout: 250,
   });
 
   const router = useRouter();
@@ -77,6 +78,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
   });
 
   const revertLastChoice = useCallback(() => {
+    abortDuringRevert.current = true;
     setCurrentTranslation(lastTranslation);
     if (known.includes(lastTranslation!.id)) {
       deleteKnown.mutate({ wordId: lastTranslation!.id, userId: user!.id });
@@ -136,7 +138,9 @@ export function Practice({ words, knowns, allWords }: Practice) {
         setTimeout(() => {
           setRotationPosition(AnimationPosition.middle);
           setTimeout(() => {
-            setCurrentTranslation(pair);
+            if (abortDuringRevert.current) {
+              abortDuringRevert.current = false;
+            } else setCurrentTranslation(pair);
             setRotationPosition(AnimationPosition.init);
           }, rotationTimeout);
         }, rotationTimeout);
