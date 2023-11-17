@@ -10,6 +10,12 @@ export const knownRouter = createTRPCRouter({
       where: (known, { eq }) => eq(known.userId, input),
     });
   }),
+  getAllWithWord: publicProcedure.input(z.string()).query(({ ctx, input }) => {
+    return ctx.db.query.known.findMany({
+      where: (known, { eq }) => eq(known.userId, input),
+      with: { word: true },
+    });
+  }),
   getAllByUserId: publicProcedure.input(z.string()).query(({ ctx, input }) => {
     return ctx.db.query.known.findMany({
       where: (known, { eq }) => eq(known.userId, input),

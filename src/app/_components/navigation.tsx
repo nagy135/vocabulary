@@ -8,10 +8,14 @@ const linksToShow: Record<
   { pages: Page[]; variant?: ComponentProps<typeof Button>["variant"] }
 > = {
   [Page.home]: {
-    pages: [Page.practice],
+    pages: [Page.practice, Page.learned],
   },
   [Page.practice]: {
-    pages: [Page.home],
+    pages: [Page.home, Page.learned],
+    variant: "secondary",
+  },
+  [Page.learned]: {
+    pages: [Page.home, Page.practice],
     variant: "outline",
   },
 };
@@ -24,6 +28,10 @@ const pageData: Record<Page, { url: string; label: string }> = {
   [Page.practice]: {
     url: "/practice",
     label: "Practice",
+  },
+  [Page.learned]: {
+    url: "/learned",
+    label: "Learned",
   },
 };
 
