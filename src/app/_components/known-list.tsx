@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
+  type ColumnDef,
+  type ColumnFiltersState,
+  type SortingState,
+  type VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -22,7 +22,6 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/app/_components/ui/dropdown-menu";
@@ -36,7 +35,7 @@ import {
   TableRow,
 } from "~/app/_components/ui/table";
 
-import { SelectKnown, SelectWord } from "~/server/db/schema";
+import { type SelectKnown, type SelectWord } from "~/server/db/schema";
 
 type KnownRecord = {
   knownId: SelectKnown["id"];
