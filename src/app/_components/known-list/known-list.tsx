@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import {
-  type ColumnDef,
   type ColumnFiltersState,
   type SortingState,
   type VisibilityState,
@@ -13,16 +12,13 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 import { Button } from "~/app/_components/ui/button";
-import { Checkbox } from "~/app/_components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/app/_components/ui/dropdown-menu";
 import { Input } from "~/app/_components/ui/input";
@@ -36,8 +32,16 @@ import {
 } from "~/app/_components/ui/table";
 
 import { type SelectKnown, type SelectWord } from "~/server/db/schema";
+import { useEffect, useState } from "react";
+import {
+  RevealPosition,
+  revealStyleHorizontal,
+  revealStyleVertical,
+} from "./animations";
+import { columns } from "./table-columns";
+import useScreenWidth from "~/app/hooks/use-screen-width";
 
-type KnownRecord = {
+export type KnownRecord = {
   knownId: SelectKnown["id"];
   wordName: SelectWord["name"];
   wordTranslation: SelectWord["translation"];
@@ -46,102 +50,25 @@ type KnownList = {
   knowns: KnownRecord[];
 };
 
-export const columns: ColumnDef<KnownRecord>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected()}
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "wordName",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Word
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => (
-      <div className="lowercase">{row.getValue("wordName")}</div>
-    ),
-  },
-  {
-    accessorKey: "wordTranslation",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Translation
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => (
-      <div className="lowercase">{row.getValue("wordTranslation")}</div>
-    ),
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const knownRecord = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() =>
-                navigator.clipboard.writeText(knownRecord.wordTranslation ?? "")
-              }
-            >
-              Delete
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
-];
 export default function KnownList({ knowns }: KnownList) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
+  const [rowSelection, setRowSelection] = useState({});
 
+  const [revealPosition, setRevealPosition] = useState(RevealPosition.init);
+
+  useEffect(() => {
+    if (Object.keys(rowSelection).length)
+      setRevealPosition(RevealPosition.middle);
+    else setRevealPosition(RevealPosition.init);
+  }, [rowSelection]);
+
+  const screenWidth = useScreenWidth();
   const table = useReactTable({
     data: knowns,
-    columns,
+    columns: columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -177,8 +104,14 @@ export default function KnownList({ knowns }: KnownList) {
         <div className="flex flex-col gap-2 md:flex-row">
           <Button
             disabled={!table.getFilteredSelectedRowModel().rows.length}
+            onClick={() => alert("not implemented")}
             variant="destructive"
             className="ml-auto"
+            style={
+              screenWidth && screenWidth > 768
+                ? revealStyleHorizontal[revealPosition]
+                : revealStyleVertical[revealPosition]
+            }
           >
             Delete selected
           </Button>

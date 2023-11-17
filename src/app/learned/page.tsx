@@ -2,7 +2,7 @@ import { currentUser } from "@clerk/nextjs";
 import Navigation from "~/app/_components/navigation";
 import { Page } from "~/enums";
 import { api } from "~/trpc/server";
-import KnownList from "../_components/known-list";
+import KnownList from "../_components/known-list/known-list";
 
 export default async function LearnedPage() {
   const user = await currentUser();
