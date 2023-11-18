@@ -108,7 +108,16 @@ export function Practice({ words, knowns, allWords }: Practice) {
     setTimeout(() => {
       setPulsePosition(AnimationPosition.init);
     }, pulseTimeout);
-  }, [lastTranslation, known, deleteKnown, toast, user]);
+  }, [
+    lastTranslation,
+    known,
+    deleteKnown,
+    toast,
+    user,
+    pulseTimeout,
+    router,
+    setPulsePosition,
+  ]);
 
   const onSubmit = useCallback(
     (resolution: "easy" | "repeat") => {
@@ -170,7 +179,20 @@ export function Practice({ words, knowns, allWords }: Practice) {
         }, rotationTimeout);
       }, REVEAL_TIMEOUT);
     },
-    [currentTranslation, words, toast, user, known, updateKnown],
+    [
+      currentTranslation,
+      words,
+      toast,
+      user,
+      known,
+      updateKnown,
+      pulseTimeout,
+      rotationTimeout,
+      router,
+      setPulsePosition,
+      setRevealPosition,
+      setRotationPosition,
+    ],
   );
 
   return (

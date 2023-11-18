@@ -11,7 +11,6 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-  RowSelectionState,
 } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
 
@@ -73,7 +72,7 @@ export default function KnownList({ knowns: knownsInput }: KnownList) {
   useEffect(() => {
     if (Object.keys(rowSelection).length) setPosition(AnimationPosition.middle);
     else setPosition(AnimationPosition.init);
-  }, [rowSelection]);
+  }, [rowSelection, setPosition]);
 
   const deleteKnown = api.known.deleteById.useMutation({
     onSuccess: () => {
@@ -108,7 +107,7 @@ export default function KnownList({ knowns: knownsInput }: KnownList) {
         (id) => table.getRow(id).original.knownId,
       ),
     });
-  }, [deleteManyKnown, rowSelection, user]);
+  }, [deleteManyKnown, rowSelection, user, table]);
 
   const deleteCall = useCallback(
     (knownId: number) => {

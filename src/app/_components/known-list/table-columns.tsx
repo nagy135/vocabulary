@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/app/_components/ui/dropdown-menu";
-import { KnownRecord } from "./known-list";
+import { type KnownRecord } from "./known-list";
 import { Checkbox } from "../ui/checkbox";
 import { Button } from "../ui/button";
 export const columns = (
