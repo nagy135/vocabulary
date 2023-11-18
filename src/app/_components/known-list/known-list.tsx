@@ -82,9 +82,12 @@ export default function KnownList({ knowns }: KnownList) {
     },
   });
 
-  const deleteCall = (knownId: number) => {
-    deleteKnown.mutate(knownId);
-  };
+  const deleteCall = useCallback(
+    (knownId: number) => {
+      deleteKnown.mutate(knownId);
+    },
+    [deleteKnown],
+  );
 
   const table = useReactTable({
     data: knowns,
