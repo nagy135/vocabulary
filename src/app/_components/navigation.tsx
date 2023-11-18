@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { Page } from "~/enums";
+import { Page, PageUrl } from "~/enums";
 import { type ComponentProps } from "react";
 
 const linksToShow: Record<
@@ -20,17 +20,17 @@ const linksToShow: Record<
   },
 };
 
-const pageData: Record<Page, { url: string; label: string }> = {
+export const pageData: Record<Page, { url: string; label: string }> = {
   [Page.home]: {
-    url: "/",
+    url: PageUrl.home,
     label: "Add",
   },
   [Page.practice]: {
-    url: "/practice",
+    url: PageUrl.practice,
     label: "Practice",
   },
   [Page.learned]: {
-    url: "/learned",
+    url: PageUrl.learned,
     label: "Learned",
   },
 };
@@ -43,9 +43,7 @@ export default function Navigation({ currentPage }: { currentPage: Page }) {
           key={`navigation-${i}`}
           variant={linksToShow[e].variant ?? "default"}
         >
-          <Link prefetch={false} href={pageData[e].url}>
-            {pageData[e].label}
-          </Link>
+          <Link href={pageData[e].url}>{pageData[e].label}</Link>
         </Button>
       ))}
     </div>

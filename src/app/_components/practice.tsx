@@ -11,6 +11,7 @@ import { useUser } from "@clerk/nextjs";
 import { Progress } from "./ui/progress";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimationPosition, useAnimation } from "~/animation";
+import { PageUrl } from "~/enums";
 
 function pickRandomElement<T>(array: T[]): T | undefined {
   return array[Math.floor(Math.random() * array.length)];
@@ -95,6 +96,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
     setCurrentTranslation(lastTranslation);
     if (known.includes(lastTranslation!.id)) {
       deleteKnown.mutate({ wordId: lastTranslation!.id, userId: user!.id });
+      router.prefetch(PageUrl.learned);
     }
     setLastTranslation(undefined);
     toast({
@@ -122,6 +124,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
         });
         updateKnown.mutate({ wordId: currentTranslation.id, userId: user!.id });
         setPulsePosition(AnimationPosition.middle);
+        router.prefetch(PageUrl.learned);
         setTimeout(() => {
           setPulsePosition(AnimationPosition.init);
         }, pulseTimeout);
