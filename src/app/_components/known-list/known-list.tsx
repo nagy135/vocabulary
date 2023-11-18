@@ -95,20 +95,6 @@ export default function KnownList({ knowns: knownsInput }: KnownList) {
     },
   });
 
-  const deleteSelectedRows = useCallback(() => {
-    if (!user) {
-      alert("no user");
-      return;
-    }
-
-    deleteManyKnown.mutate({
-      userId: user.id,
-      ids: Object.keys(rowSelection).map(
-        (id) => table.getRow(id).original.knownId,
-      ),
-    });
-  }, [deleteManyKnown, rowSelection, user, table]);
-
   const deleteCall = useCallback(
     (knownId: number) => {
       deleteKnown.mutate(knownId);
@@ -134,6 +120,20 @@ export default function KnownList({ knowns: knownsInput }: KnownList) {
       rowSelection,
     },
   });
+
+  const deleteSelectedRows = useCallback(() => {
+    if (!user) {
+      alert("no user");
+      return;
+    }
+
+    deleteManyKnown.mutate({
+      userId: user.id,
+      ids: Object.keys(rowSelection).map(
+        (id) => table.getRow(id).original.knownId,
+      ),
+    });
+  }, [deleteManyKnown, rowSelection, user, table]);
 
   return (
     <div className="mt-10 w-full p-5">
