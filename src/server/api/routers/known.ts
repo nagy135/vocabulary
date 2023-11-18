@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
@@ -51,6 +51,18 @@ export const knownRouter = createTRPCRouter({
       return ctx.db
         .delete(known)
         .where(and(eq(known.userId, userId), eq(known.wordId, wordId)));
+    }),
+  deleteManyById: publicProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        ids: z.array(z.number()),
+      }),
+    )
+    .mutation(async ({ ctx, input: { userId, ids } }) => {
+      return ctx.db
+        .delete(known)
+        .where(and(eq(known.userId, userId), inArray(known.id, ids)));
     }),
   deleteById: publicProcedure
     .input(z.number())

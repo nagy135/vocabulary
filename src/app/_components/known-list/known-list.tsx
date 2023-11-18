@@ -11,6 +11,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  RowSelectionState,
 } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
 
@@ -32,7 +33,7 @@ import {
 } from "~/app/_components/ui/table";
 
 import { type SelectKnown, type SelectWord } from "~/server/db/schema";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { columns } from "./table-columns";
 import useScreenWidth from "~/app/hooks/use-screen-width";
 import { AnimationPosition, useAnimation } from "~/animation";
@@ -56,6 +57,7 @@ export default function KnownList({ knowns }: KnownList) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const { user } = useUser();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -81,6 +83,31 @@ export default function KnownList({ knowns }: KnownList) {
       router.refresh();
     },
   });
+
+  const deleteManyKnown = api.known.deleteManyById.useMutation({
+    onSuccess: (_data, { ids }) => {
+      toast({
+        title: `Deleted ${ids.length} selected known word(s)`,
+        variant: "destructive",
+      });
+      router.refresh();
+      table.resetRowSelection();
+    },
+  });
+
+  const deleteSelectedRows = useCallback(() => {
+    if (!user) {
+      alert("no user");
+      return;
+    }
+
+    deleteManyKnown.mutate({
+      userId: user.id,
+      ids: Object.keys(rowSelection).map(
+        (id) => table.getRow(id).original.knownId,
+      ),
+    });
+  }, [deleteManyKnown, rowSelection, user]);
 
   const deleteCall = useCallback(
     (knownId: number) => {
@@ -127,7 +154,7 @@ export default function KnownList({ knowns }: KnownList) {
         <div className="flex flex-col gap-2 md:flex-row">
           <Button
             disabled={!table.getFilteredSelectedRowModel().rows.length}
-            onClick={() => alert("not implemented")}
+            onClick={deleteSelectedRows}
             variant="destructive"
             className="ml-auto"
             style={style}
