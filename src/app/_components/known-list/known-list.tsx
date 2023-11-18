@@ -51,7 +51,8 @@ type KnownList = {
   knowns: KnownRecord[];
 };
 
-export default function KnownList({ knowns }: KnownList) {
+export default function KnownList({ knowns: knownsInput }: KnownList) {
+  const [knowns, setKnowns] = useState(knownsInput);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] =
@@ -90,8 +91,8 @@ export default function KnownList({ knowns }: KnownList) {
         title: `Deleted ${ids.length} selected known word(s)`,
         variant: "destructive",
       });
-      router.refresh();
       table.resetRowSelection();
+      setKnowns((prev) => prev.filter((e) => !ids.includes(e.knownId)));
     },
   });
 
