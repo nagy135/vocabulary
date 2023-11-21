@@ -35,7 +35,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
   >(undefined);
   const [known, setKnown] = useState<number[]>([]);
   const [revertBlocked, setRevertBlocked] = useState(false);
-  const abortDuringRevert = useRef(false);
+  const [animationInProgress, setAnimationInProgress] = useState(false);
 
   const {
     setPosition: setRotationPosition,
@@ -92,16 +92,14 @@ export function Practice({ words, knowns, allWords }: Practice) {
   });
 
   const revertLastChoice = useCallback(() => {
-    abortDuringRevert.current = true;
     setCurrentTranslation(lastTranslation);
+    setLastTranslation(undefined);
     if (known.includes(lastTranslation!.id)) {
       deleteKnown.mutate({ wordId: lastTranslation!.id, userId: user!.id });
       router.prefetch(PageUrl.learned);
     }
-    setLastTranslation(undefined);
     toast({
       title: "Back to last word",
-      description: `${lastTranslation?.name} :: ${lastTranslation?.translation}`,
       variant: "default",
     });
     setPulsePosition(AnimationPosition.middle);
@@ -117,6 +115,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
     pulseTimeout,
     router,
     setPulsePosition,
+    setCurrentTranslation,
   ]);
 
   const onSubmit = useCallback(
@@ -165,16 +164,16 @@ export function Practice({ words, knowns, allWords }: Practice) {
           return;
         }
       }
+      setAnimationInProgress(true);
       setRevealPosition(AnimationPosition.middle);
       setTimeout(() => {
         setRevealPosition(AnimationPosition.init);
         setTimeout(() => {
           setRotationPosition(AnimationPosition.middle);
           setTimeout(() => {
-            if (abortDuringRevert.current) {
-              abortDuringRevert.current = false;
-            } else setCurrentTranslation(pair);
+            setCurrentTranslation(pair);
             setRotationPosition(AnimationPosition.init);
+            setAnimationInProgress(false);
           }, rotationTimeout);
         }, rotationTimeout);
       }, REVEAL_TIMEOUT);
@@ -192,6 +191,8 @@ export function Practice({ words, knowns, allWords }: Practice) {
       setPulsePosition,
       setRevealPosition,
       setRotationPosition,
+      setCurrentTranslation,
+      setAnimationInProgress,
     ],
   );
 
@@ -222,7 +223,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
         <div className="flex justify-between gap-2 md:flex-col">
           <Button onClick={() => onSubmit("easy")}>Easy, skip this</Button>
           <Button
-            disabled={!lastTranslation || revertBlocked}
+            disabled={!lastTranslation || revertBlocked || animationInProgress}
             variant="destructive"
             onClick={() => revertLastChoice()}
           >
