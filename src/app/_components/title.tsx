@@ -1,4 +1,4 @@
-import { Page } from "~/enums";
+import { type Page } from "~/enums";
 import Navigation from "./navigation";
 
 type Title = {

@@ -3,7 +3,7 @@
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { type SelectKnown, type SelectWord } from "~/server/db/schema";
 import { Badge } from "./ui/badge";
 import { api } from "~/trpc/react";
