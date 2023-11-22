@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
@@ -26,6 +26,22 @@ export const knownRouter = createTRPCRouter({
         },
       },
     });
+  }),
+  getUsersWithKnownCount: publicProcedure.query(async ({ ctx }) => {
+    const result = await ctx.db
+      .select({
+        userId: known.userId,
+        count: sql<string>`count(${known.id})`,
+      })
+      .from(known)
+      .groupBy(known.userId);
+    return result.map((e) => ({ ...e, count: parseInt(e.count) }));
+  }),
+  getUniqueUserIds: publicProcedure.query(async ({ ctx }) => {
+    const result = await ctx.db
+      .selectDistinct({ userId: known.userId })
+      .from(known);
+    return result.map((e) => e.userId);
   }),
   create: publicProcedure
     .input(
