@@ -22,3 +22,6 @@ export default async function LearnedPage() {
     </main>
   );
 }
+
+const dynamic = "force-dynamic";
+const revalidate = 0;
