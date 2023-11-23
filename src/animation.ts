@@ -110,8 +110,8 @@ export const useAnimation = ({
       },
     };
   } else if (variety === "fly-into") {
-    const { x, y } = init as { x: number; y: number };
-    const { x: x2, y: y2 } = middle as { x: number; y: number };
+    const { x, y } = initOffset as { x: number; y: number };
+    const { x: x2, y: y2 } = middleOffset as { x: number; y: number };
     style = {
       [AnimationPosition.init]: {
         transform: `translate(${x}px, ${y}px) scale(1)`,
