@@ -46,6 +46,8 @@ export function Practice({ words, knowns, allWords }: Practice) {
   const [inputFlyPos, setInputFlyPos] = useState<[number, number]>([0, 0]);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const [isKnownReveal, setIsKnownReveal] = useState(false);
+
   const screenWidth = useScreenWidth();
 
   const {
@@ -61,6 +63,16 @@ export function Practice({ words, knowns, allWords }: Practice) {
     variety: "reveal-y",
     offset: { init: 80, middle: -10 },
     timeout: { init: 250, middle: 250 },
+  });
+
+  const {
+    setPosition: setKnownRevealPosition,
+    style: knownRevealStyle,
+    timeout: knownRevealTimeout,
+  } = useAnimation({
+    variety: "reveal-y",
+    offset: { init: 80, middle: 80 },
+    timeout: { init: 200, middle: 1000 },
   });
 
   useLayoutEffect(() => {
@@ -96,7 +108,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
         y: inputFlyPos[1],
       },
     },
-    timeout: { init: 200, middle: 1000 },
+    timeout: { init: 200, middle: 1200 },
   });
 
   const {
@@ -210,12 +222,13 @@ export function Practice({ words, knowns, allWords }: Practice) {
 
       setAnimationInProgress(true);
       if (resolution === "easy") {
+        setIsKnownReveal(true);
         setFlyPosition(AnimationPosition.middle);
+        setKnownRevealPosition(AnimationPosition.middle);
         setTimeout(() => {
-          toast({
-            title: "Learned",
-            description: `${currentTranslation?.name} :: ${currentTranslation?.translation}`
-          })
+          setKnownRevealPosition(AnimationPosition.init);
+        }, knownRevealTimeout.middle);
+        setTimeout(() => {
           setCurrentTranslation(pair);
           setFlyPosition(AnimationPosition.init);
           setTimeout(() => {
@@ -223,6 +236,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
           }, flyTimeout.init);
         }, flyTimeout.middle);
       } else {
+        setIsKnownReveal(false);
         setRevealPosition(AnimationPosition.middle);
         setTimeout(() => {
           setRevealPosition(AnimationPosition.init);
@@ -244,6 +258,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
       toast,
       known,
       updateKnown,
+      knownRevealTimeout,
       pulseTimeout,
       rotationTimeout,
       flyTimeout,
@@ -253,6 +268,8 @@ export function Practice({ words, knowns, allWords }: Practice) {
       setRotationPosition,
       setCurrentTranslation,
       setAnimationInProgress,
+      setKnownRevealPosition,
+      setIsKnownReveal,
       setFlyPosition,
     ],
   );
@@ -263,7 +280,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
         <Input
           placeholder=""
           className="h-20 text-center text-xl"
-          style={revealStyle}
+          style={isKnownReveal ? knownRevealStyle : revealStyle}
           readOnly
           value={currentTranslation?.name ?? "-"}
           contentEditable={false}
