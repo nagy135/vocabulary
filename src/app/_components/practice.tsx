@@ -3,7 +3,7 @@
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { type SelectKnown, type SelectWord } from "~/server/db/schema";
 import { Badge } from "./ui/badge";
 import { api } from "~/trpc/react";
@@ -50,6 +50,20 @@ export function Practice({ words, knowns, allWords }: Practice) {
     variety: "reveal-y",
     offset: { init: 80, middle: -10 },
     timeout: 250,
+  });
+
+  const {
+    setPosition: setInputPulsePosition,
+    style: inputPulseStyle,
+    timeout: inputPulseTimeout,
+  } = useAnimation({
+    variety: "pulse",
+    offset: {
+      init: 1,
+      middle: 1.1,
+    },
+    timeout: 300,
+    color: "#19a85b",
   });
 
   const {
@@ -126,10 +140,6 @@ export function Practice({ words, knowns, allWords }: Practice) {
       }
       setLastTranslation(currentTranslation);
       if (resolution === "easy") {
-        toast({
-          title: "Too easy, understood",
-          description: `${currentTranslation.name} :: ${currentTranslation.translation}`,
-        });
         updateKnown.mutate({ wordId: currentTranslation.id, userId: user!.id });
         setPulsePosition(AnimationPosition.middle);
         router.prefetch(PageUrl.learned);
@@ -164,7 +174,14 @@ export function Practice({ words, knowns, allWords }: Practice) {
           return;
         }
       }
+
       setAnimationInProgress(true);
+      if (resolution === "easy") {
+        setInputPulsePosition(AnimationPosition.middle);
+        setTimeout(() => {
+          setInputPulsePosition(AnimationPosition.init);
+        }, inputPulseTimeout);
+      }
       setRevealPosition(AnimationPosition.middle);
       setTimeout(() => {
         setRevealPosition(AnimationPosition.init);
@@ -210,7 +227,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
         <Input
           placeholder="My translation"
           className="h-20 text-center text-xl"
-          style={rotationStyle}
+          style={{ ...rotationStyle, ...inputPulseStyle }}
           readOnly
           value={currentTranslation?.translation ?? "-"}
           contentEditable={false}
@@ -221,7 +238,12 @@ export function Practice({ words, knowns, allWords }: Practice) {
           Need more practice
         </Button>
         <div className="flex justify-between gap-2 md:flex-col">
-          <Button onClick={() => onSubmit("easy")}>Easy, skip this</Button>
+          <Button
+            disabled={revertBlocked || animationInProgress}
+            onClick={() => onSubmit("easy")}
+          >
+            Easy, skip this
+          </Button>
           <Button
             disabled={!lastTranslation || revertBlocked || animationInProgress}
             variant="destructive"

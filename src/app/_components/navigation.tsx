@@ -48,7 +48,10 @@ export default function Navigation({ currentPage }: { currentPage: Page }) {
     <div className="absolute left-0 top-0 m-3 flex gap-2">
       {linksToShow[currentPage].pages.map((e, i) => (
         <Link prefetch={false} key={`navigation-${i}`} href={pageData[e].url}>
-          <Button variant={linksToShow[e].variant ?? "default"}>
+          <Button
+            id={`navigation-${pageData[e].label}`}
+            variant={linksToShow[e].variant ?? "default"}
+          >
             {pageData[e].label}
           </Button>
         </Link>

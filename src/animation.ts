@@ -9,11 +9,13 @@ export const useAnimation = ({
   offset: { init, middle },
   timeout,
   orientation = "horizontal",
+  color,
 }: {
   variety: "rotate" | "reveal-y" | "reveal-vh" | "reveal-hv" | "pulse";
   offset: { init: number; middle: number };
   timeout: number;
   orientation?: "horizontal" | "vertical";
+  color?: CSSProperties["color"];
 }) => {
   const [position, setPosition] = useState<AnimationPosition>(
     AnimationPosition.init,
@@ -85,7 +87,8 @@ export const useAnimation = ({
         transition: `transform ${timeout / 1000}s ease-in-out`,
       },
       [AnimationPosition.middle]: {
-        transform: `scale(${middle})`,
+        // transform: `scale(${middle})`,
+        boxShadow: color ? `0px 0px 36px 2px ${color}` : undefined,
         transition: `transform ${timeout / 1000}s ease-in-out`,
       },
     };
