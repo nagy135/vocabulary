@@ -65,7 +65,7 @@ export default function KnownList({ knowns: knownsInput }: KnownList) {
   const { setPosition, style } = useAnimation({
     variety: "reveal-hv",
     offset: { init: 49, middle: -10 },
-    timeout: 500,
+    timeout: { init: 500, middle: 500 },
     orientation: screenWidth && screenWidth > 768 ? "horizontal" : "vertical",
   });
 

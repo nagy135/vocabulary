@@ -3,7 +3,13 @@
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { type SelectKnown, type SelectWord } from "~/server/db/schema";
 import { Badge } from "./ui/badge";
 import { api } from "~/trpc/react";
@@ -12,6 +18,7 @@ import { Progress } from "./ui/progress";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimationPosition, useAnimation } from "~/animation";
 import { PageUrl } from "~/enums";
+import useScreenWidth from "../hooks/use-screen-width";
 
 function pickRandomElement<T>(array: T[]): T | undefined {
   return array[Math.floor(Math.random() * array.length)];
@@ -36,6 +43,10 @@ export function Practice({ words, knowns, allWords }: Practice) {
   const [known, setKnown] = useState<number[]>([]);
   const [revertBlocked, setRevertBlocked] = useState(false);
   const [animationInProgress, setAnimationInProgress] = useState(false);
+  const [inputFlyPos, setInputFlyPos] = useState<[number, number]>([0, 0]);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const screenWidth = useScreenWidth();
 
   const {
     setPosition: setRotationPosition,
@@ -44,26 +55,48 @@ export function Practice({ words, knowns, allWords }: Practice) {
   } = useAnimation({
     variety: "rotate",
     offset: { init: 0, middle: 90 },
-    timeout: 230,
+    timeout: { init: 230, middle: 230 },
   });
   const { setPosition: setRevealPosition, style: revealStyle } = useAnimation({
     variety: "reveal-y",
     offset: { init: 80, middle: -10 },
-    timeout: 250,
+    timeout: { init: 250, middle: 250 },
   });
 
+  useLayoutEffect(() => {
+    const inputPosition = (): [number, number] => {
+      if (!inputRef) return [0, 0];
+      const rect = inputRef.current?.getBoundingClientRect();
+      const target = document
+        .getElementById("navigation-Learned")
+        ?.getBoundingClientRect();
+      if (rect && target) {
+        return [
+          -rect.left + target.left - rect.width / 2 + target.width / 2,
+          -rect.top + target.top - rect.height / 2 + target.height / 2,
+        ];
+      } else {
+        return [0, 0];
+      }
+    };
+
+    setInputFlyPos(inputPosition());
+  }, [screenWidth]);
+
   const {
-    setPosition: setInputPulsePosition,
-    style: inputPulseStyle,
-    timeout: inputPulseTimeout,
+    setPosition: setFlyPosition,
+    style: flyStyle,
+    timeout: flyTimeout,
   } = useAnimation({
-    variety: "pulse",
+    variety: "fly-into",
     offset: {
-      init: 1,
-      middle: 1.1,
+      init: { x: 0, y: 0 },
+      middle: {
+        x: inputFlyPos[0],
+        y: inputFlyPos[1],
+      },
     },
-    timeout: 300,
-    color: "#19a85b",
+    timeout: { init: 200, middle: 1000 },
   });
 
   const {
@@ -76,7 +109,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
       init: 1,
       middle: 1.1,
     },
-    timeout: 100,
+    timeout: { init: 200, middle: 100 },
   });
 
   const router = useRouter();
@@ -119,7 +152,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
     setPulsePosition(AnimationPosition.middle);
     setTimeout(() => {
       setPulsePosition(AnimationPosition.init);
-    }, pulseTimeout);
+    }, pulseTimeout.middle);
   }, [
     lastTranslation,
     known,
@@ -140,12 +173,12 @@ export function Practice({ words, knowns, allWords }: Practice) {
       }
       setLastTranslation(currentTranslation);
       if (resolution === "easy") {
-        updateKnown.mutate({ wordId: currentTranslation.id, userId: user!.id });
+        // updateKnown.mutate({ wordId: currentTranslation.id, userId: user!.id });
         setPulsePosition(AnimationPosition.middle);
         router.prefetch(PageUrl.learned);
         setTimeout(() => {
           setPulsePosition(AnimationPosition.init);
-        }, pulseTimeout);
+        }, pulseTimeout.middle);
       }
       if (known.length === words.length) {
         toast({
@@ -177,23 +210,28 @@ export function Practice({ words, knowns, allWords }: Practice) {
 
       setAnimationInProgress(true);
       if (resolution === "easy") {
-        setInputPulsePosition(AnimationPosition.middle);
+        setFlyPosition(AnimationPosition.middle);
         setTimeout(() => {
-          setInputPulsePosition(AnimationPosition.init);
-        }, inputPulseTimeout);
-      }
-      setRevealPosition(AnimationPosition.middle);
-      setTimeout(() => {
-        setRevealPosition(AnimationPosition.init);
-        setTimeout(() => {
-          setRotationPosition(AnimationPosition.middle);
+          setCurrentTranslation(pair);
+          setFlyPosition(AnimationPosition.init);
           setTimeout(() => {
-            setCurrentTranslation(pair);
-            setRotationPosition(AnimationPosition.init);
             setAnimationInProgress(false);
-          }, rotationTimeout);
-        }, rotationTimeout);
-      }, REVEAL_TIMEOUT);
+          }, flyTimeout.init);
+        }, flyTimeout.middle);
+      } else {
+        setRevealPosition(AnimationPosition.middle);
+        setTimeout(() => {
+          setRevealPosition(AnimationPosition.init);
+          setTimeout(() => {
+            setRotationPosition(AnimationPosition.middle);
+            setTimeout(() => {
+              setCurrentTranslation(pair);
+              setRotationPosition(AnimationPosition.init);
+              setAnimationInProgress(false);
+            }, rotationTimeout.init);
+          }, rotationTimeout.middle);
+        }, REVEAL_TIMEOUT);
+      }
     },
     [
       currentTranslation,
@@ -225,9 +263,11 @@ export function Practice({ words, knowns, allWords }: Practice) {
           contentEditable={false}
         />
         <Input
+          id="translation-input"
           placeholder="My translation"
           className="h-20 text-center text-xl"
-          style={{ ...rotationStyle, ...inputPulseStyle }}
+          ref={inputRef}
+          style={{ ...rotationStyle, ...flyStyle }}
           readOnly
           value={currentTranslation?.translation ?? "-"}
           contentEditable={false}
