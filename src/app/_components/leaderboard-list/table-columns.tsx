@@ -17,7 +17,11 @@ export const columns = (): ColumnDef<LeaderboardRecord>[] => [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
+    cell: ({ row }) => (
+      <div className="lowercase">
+        {(row.getValue("name") as string).substring(0, 20)}
+      </div>
+    ),
   },
   {
     accessorKey: "count",
