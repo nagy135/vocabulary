@@ -39,7 +39,7 @@ export const pageData: Record<Page, { url: string; label: string }> = {
   },
   [Page.leaderboard]: {
     url: PageUrl.leaderboard,
-    label: "Leaderboard",
+    label: "Board",
   },
 };
 
