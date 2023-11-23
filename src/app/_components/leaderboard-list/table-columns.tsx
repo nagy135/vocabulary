@@ -19,7 +19,7 @@ export const columns = (): ColumnDef<LeaderboardRecord>[] => [
     },
     cell: ({ row }) => (
       <div className="lowercase">
-        {(row.getValue("name") as string).substring(0, 20)}
+        {row.getValue<string>("name").substring(0, 20)}
       </div>
     ),
   },
