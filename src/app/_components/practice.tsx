@@ -173,7 +173,7 @@ export function Practice({ words, knowns, allWords }: Practice) {
       }
       setLastTranslation(currentTranslation);
       if (resolution === "easy") {
-        // updateKnown.mutate({ wordId: currentTranslation.id, userId: user!.id });
+        updateKnown.mutate({ wordId: currentTranslation.id, userId: user!.id });
         setPulsePosition(AnimationPosition.middle);
         router.prefetch(PageUrl.learned);
         setTimeout(() => {
@@ -236,18 +236,20 @@ export function Practice({ words, knowns, allWords }: Practice) {
     [
       currentTranslation,
       words,
-      toast,
       user,
+      toast,
       known,
       updateKnown,
       pulseTimeout,
       rotationTimeout,
+      flyTimeout,
       router,
       setPulsePosition,
       setRevealPosition,
       setRotationPosition,
       setCurrentTranslation,
       setAnimationInProgress,
+      setFlyPosition,
     ],
   );
 

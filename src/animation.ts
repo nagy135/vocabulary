@@ -23,7 +23,7 @@ type AnimationProps = {
 );
 export const useAnimation = ({
   variety,
-  offset: { init, middle },
+  offset: { init: initOffset, middle: middleOffset },
   timeout,
   orientation = "horizontal",
 }: AnimationProps) => {
@@ -33,6 +33,8 @@ export const useAnimation = ({
 
   let style: Record<AnimationPosition, CSSProperties>;
   if (variety === "rotate") {
+    const init = initOffset as number;
+    const middle = middleOffset as number;
     style = {
       [AnimationPosition.init]: {
         transform: `rotate3d(0,1,0, ${init}deg)`,
@@ -49,6 +51,8 @@ export const useAnimation = ({
       },
     };
   } else if (variety === "reveal-y") {
+    const init = initOffset as number;
+    const middle = middleOffset as number;
     style = {
       [AnimationPosition.init]: {
         opacity: 0,
@@ -67,6 +71,8 @@ export const useAnimation = ({
       },
     };
   } else if (variety === "reveal-hv") {
+    const init = initOffset as number;
+    const middle = middleOffset as number;
     style = {
       [AnimationPosition.init]: {
         opacity: 0,
@@ -91,6 +97,8 @@ export const useAnimation = ({
       },
     };
   } else if (variety === "pulse") {
+    const init = initOffset as number;
+    const middle = middleOffset as number;
     style = {
       [AnimationPosition.init]: {
         transform: `scale(${init})`,
@@ -118,6 +126,8 @@ export const useAnimation = ({
       },
     };
   } else {
+    const init = initOffset as number;
+    const middle = middleOffset as number;
     style = {
       [AnimationPosition.init]: {
         opacity: 0,
