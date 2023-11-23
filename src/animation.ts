@@ -110,14 +110,13 @@ export const useAnimation = ({
       },
     };
   } else if (variety === "fly-into") {
-    const { x, y } = initOffset as { x: number; y: number };
     const { x: x2, y: y2 } = middleOffset as { x: number; y: number };
     style = {
       [AnimationPosition.init]: {
         opacity: 1,
       },
       [AnimationPosition.middle]: {
-        opacity: 0.01,
+        opacity: 0,
         borderColor: "green",
         transform: `translate(${x2}px, ${y2}px) scale(0.5)`,
         transition: `${timeout.middle / 1000}s ease-in-out`,
