@@ -41,3 +41,8 @@ export default async function PracticePage({
     </main>
   );
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const dynamic = "force-dynamic";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const revalidate = 0;
