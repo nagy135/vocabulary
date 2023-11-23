@@ -212,6 +212,10 @@ export function Practice({ words, knowns, allWords }: Practice) {
       if (resolution === "easy") {
         setFlyPosition(AnimationPosition.middle);
         setTimeout(() => {
+          toast({
+            title: "Learned",
+            description: `${currentTranslation?.name} :: ${currentTranslation?.translation}`
+          })
           setCurrentTranslation(pair);
           setFlyPosition(AnimationPosition.init);
           setTimeout(() => {

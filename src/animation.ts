@@ -114,9 +114,7 @@ export const useAnimation = ({
     const { x: x2, y: y2 } = middleOffset as { x: number; y: number };
     style = {
       [AnimationPosition.init]: {
-        transform: `translate(${x}px, ${y}px) scale(1)`,
         opacity: 1,
-        transition: `${timeout.init / 1000}s ease-in-out`,
       },
       [AnimationPosition.middle]: {
         opacity: 0.01,
