@@ -18,6 +18,7 @@ import {
 import { api } from "~/trpc/react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { useToast } from "./ui/use-toast";
 import { type RefObject, useLayoutEffect, useRef, useState } from "react";
 import useScreenWidth from "../hooks/use-screen-width";
 import { AnimationPosition, useAnimation } from "~/animation";
@@ -42,6 +43,7 @@ const FormSchema = z.object({
 
 export function CreateWord() {
   const { user } = useUser();
+  const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const inputRef2 = useRef<HTMLInputElement>(null);
   const screenWidth = useScreenWidth();
@@ -61,6 +63,13 @@ export function CreateWord() {
   const createWord = api.word.create.useMutation({
     onSuccess: () => {
       form.reset();
+    },
+    onError: () => {
+      toast({
+        title: "Create failed",
+        description: "Could not create translation pair",
+        variant: "destructive",
+      });
     },
   });
 
