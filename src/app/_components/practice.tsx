@@ -24,6 +24,29 @@ function pickRandomElement<T>(array: T[]): T | undefined {
   return array[Math.floor(Math.random() * array.length)];
 }
 
+function pickRandomElementNotIn<T extends { id: number }>(
+  from: T[],
+  notArr: number[],
+  not?: number,
+) {
+  if (from.length === notArr.length) return;
+  let picked = pickRandomElement(from);
+  if (!picked) {
+    // nothing to search from
+    return;
+  }
+  while (
+    (notArr.includes(picked.id) || (not && picked.id === not)) &&
+    from.length - notArr.length >= 1
+  ) {
+    picked = pickRandomElement(from);
+    if (!picked) {
+      return;
+    }
+  }
+  return picked;
+}
+
 type Practice = {
   words: Pick<SelectWord, "id" | "name" | "translation">[];
   knowns: SelectKnown["id"][];
@@ -34,11 +57,10 @@ const REVEAL_TIMEOUT = 1200;
 
 export function Practice({ words, knowns, allWords }: Practice) {
   const [currentTranslation, setCurrentTranslation] = useState<
-    (typeof words)[0] | undefined
-    // TODO: this can pick known word as well
+    (typeof words)[number] | undefined
   >(undefined);
   const [lastTranslation, setLastTranslation] = useState<
-    (typeof words)[0] | undefined
+    (typeof words)[number] | undefined
   >(undefined);
   const [known, setKnown] = useState<number[]>([]);
   const [revertBlocked, setRevertBlocked] = useState(false);
@@ -130,9 +152,16 @@ export function Practice({ words, knowns, allWords }: Practice) {
   const { user } = useUser();
 
   useEffect(() => {
-    setCurrentTranslation(pickRandomElement(words));
+    const pair = pickRandomElementNotIn(words, knowns);
+    if (!pair) {
+      toast({
+        title: "No pairs to practice",
+      });
+      return;
+    }
+    setCurrentTranslation(pair);
     setKnown(knowns);
-  }, [knowns, words]);
+  }, [knowns, words, toast]);
 
   const updateKnown = api.known.create.useMutation({
     onMutate: () => setRevertBlocked(true),
@@ -200,24 +229,12 @@ export function Practice({ words, knowns, allWords }: Practice) {
         return;
       }
 
-      let pair = pickRandomElement(words);
+      const pair = pickRandomElementNotIn(words, known, currentTranslation.id);
       if (!pair) {
         toast({
           title: "No more pairs to practice",
         });
         return;
-      }
-      while (
-        known.includes(pair.id) ||
-        (pair.id === currentTranslation.id && words.length - known.length > 1)
-      ) {
-        pair = pickRandomElement(words);
-        if (!pair) {
-          toast({
-            title: "No more pairs to practice",
-          });
-          return;
-        }
       }
 
       setAnimationInProgress(true);
