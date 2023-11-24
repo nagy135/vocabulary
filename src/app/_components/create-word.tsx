@@ -18,7 +18,9 @@ import {
 import { api } from "~/trpc/react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { useToast } from "./ui/use-toast";
+import { type RefObject, useLayoutEffect, useRef, useState } from "react";
+import useScreenWidth from "../hooks/use-screen-width";
+import { AnimationPosition, useAnimation } from "~/animation";
 
 const FormSchema = z.object({
   name: z
@@ -40,7 +42,12 @@ const FormSchema = z.object({
 
 export function CreateWord() {
   const { user } = useUser();
-  const { toast } = useToast();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef2 = useRef<HTMLInputElement>(null);
+  const screenWidth = useScreenWidth();
+  const [inputFlyPos, setInputFlyPos] = useState<[number, number]>([0, 0]);
+  const [inputFlyPos2, setInputFlyPos2] = useState<[number, number]>([0, 0]);
+  const [createBlocked, setCreateBlocked] = useState(false);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -53,13 +60,60 @@ export function CreateWord() {
 
   const createWord = api.word.create.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Created successfully",
-        description: "Translation pair has been created",
-      });
       form.reset();
     },
   });
+
+  const {
+    setPosition: setFlyPosition,
+    style: flyStyle,
+    timeout: flyTimeout,
+  } = useAnimation({
+    variety: "fly-into",
+    offset: {
+      init: { x: 0, y: 0 },
+      middle: {
+        x: inputFlyPos[0],
+        y: inputFlyPos[1],
+      },
+    },
+    timeout: { init: 700, middle: 1200 },
+  });
+
+  const { setPosition: setFlyPosition2, style: flyStyle2 } = useAnimation({
+    variety: "fly-into",
+    offset: {
+      init: { x: 0, y: 0 },
+      middle: {
+        x: inputFlyPos2[0],
+        y: inputFlyPos2[1],
+      },
+    },
+    timeout: { init: 700, middle: 1200 },
+  });
+
+  useLayoutEffect(() => {
+    const inputPosition = (
+      ref: RefObject<HTMLInputElement>,
+    ): [number, number] => {
+      if (!inputRef) return [0, 0];
+      const rect = ref.current?.getBoundingClientRect();
+      const target = document
+        .getElementById("navigation-Practice")
+        ?.getBoundingClientRect();
+      if (rect && target) {
+        return [
+          -rect.left + target.left - rect.width / 2 + target.width / 2,
+          -rect.top + target.top - rect.height / 2 + target.height / 2,
+        ];
+      } else {
+        return [0, 0];
+      }
+    };
+
+    setInputFlyPos(inputPosition(inputRef));
+    setInputFlyPos2(inputPosition(inputRef2));
+  }, [screenWidth]);
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     if (!user?.id) {
@@ -75,6 +129,14 @@ export function CreateWord() {
       translation: data.translation,
       userId: user.id,
     };
+    setCreateBlocked(true);
+    setFlyPosition(AnimationPosition.middle);
+    setFlyPosition2(AnimationPosition.middle);
+    setTimeout(() => {
+      setFlyPosition(AnimationPosition.init);
+      setFlyPosition2(AnimationPosition.init);
+      setCreateBlocked(false);
+    }, flyTimeout.middle);
     createWord.mutate(newValues);
   }
 
@@ -88,7 +150,12 @@ export function CreateWord() {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="My word" {...field} />
+                <Input
+                  style={flyStyle}
+                  placeholder="My word"
+                  {...field}
+                  ref={inputRef}
+                />
               </FormControl>
               <FormDescription>Name of the word</FormDescription>
               <FormMessage />
@@ -102,14 +169,21 @@ export function CreateWord() {
             <FormItem>
               <FormLabel>Translation</FormLabel>
               <FormControl>
-                <Input placeholder="My translation" {...field} />
+                <Input
+                  style={flyStyle2}
+                  placeholder="My translation"
+                  {...field}
+                  ref={inputRef2}
+                />
               </FormControl>
               <FormDescription>Name of the translation</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit">Create</Button>
+        <Button disabled={createBlocked} type="submit">
+          Create
+        </Button>
       </form>
     </Form>
   );
