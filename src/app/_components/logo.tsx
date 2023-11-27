@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { type CSSProperties, useCallback, useRef, useState } from "react";
+import { type CSSProperties, useRef, useState } from "react";
 
 type Piece = {
   path: string;
@@ -111,11 +111,7 @@ export default function Logo() {
       {pieces.map((piece, i) => {
         return (
           <path
-            style={movementToCss(
-              piece,
-              position,
-              pieceForces[i]!,
-            )}
+            style={movementToCss(piece, position, pieceForces[i]!)}
             key={`path-${i}`}
             d={piece.path}
           />
