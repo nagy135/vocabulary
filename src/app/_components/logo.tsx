@@ -31,6 +31,7 @@ const pieces: Piece[] = [
 
 const FORCE_MULTIPLIER = 0.3;
 const CURSOR_FORCE_MULTIPLIER = 5;
+const FORCE_DAMPENING = 0.1;
 
 const WIDTH = 150;
 const HEIGHT = 150;
@@ -45,8 +46,8 @@ const euclideanDistance = (
 };
 
 const movementToCss = (force: [number, number]): CSSProperties => {
-  const newX = mapRange(force[0] * FORCE_MULTIPLIER, -100, 100, -20, 20);
-  const newY = mapRange(force[1] * FORCE_MULTIPLIER, -100, 100, -20, 20);
+  const newX = mapRange(force[0] * FORCE_MULTIPLIER, -200, 200, -50, 50);
+  const newY = mapRange(force[1] * FORCE_MULTIPLIER, -200, 200, -50, 50);
   return {
     transform: `translate(${newX}px, ${newY}px)`,
   };
@@ -85,8 +86,8 @@ export default function Logo() {
     setPieceForces((prevForces) => {
       return prevForces.map((pieceForce) => {
         return [
-          pieceForce[0] * (1 - 0.00001 * deltaTime),
-          pieceForce[1] * (1 - 0.00001 * deltaTime),
+          pieceForce[0] * (FORCE_DAMPENING * deltaTime),
+          pieceForce[1] * (FORCE_DAMPENING * deltaTime),
         ];
       });
     });
