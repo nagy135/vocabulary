@@ -2,6 +2,7 @@
 
 import { useTheme } from "next-themes";
 import { type CSSProperties, useRef, useState } from "react";
+import { useAnimationFrame } from "../hooks/use-animation";
 
 type Piece = {
   path: string;
@@ -29,6 +30,10 @@ const pieces: Piece[] = [
 ];
 
 const FORCE_MULTIPLIER = 0.3;
+const CURSOR_FORCE_MULTIPLIER = 5;
+
+const WIDTH = 150;
+const HEIGHT = 150;
 
 const euclideanDistance = (
   x: number,
@@ -39,24 +44,23 @@ const euclideanDistance = (
   return Math.sqrt(Math.pow(x - x2, 2) + Math.pow(y - y2, 2));
 };
 
-const movementToCss = (
-  piece: Piece,
-  position: [number, number],
-  force: [number, number],
-): CSSProperties => {
-  const distance = euclideanDistance(
-    position[0],
-    position[1],
-    piece.center.x,
-    piece.center.y,
-  );
-  const forceMultiplier = distance * 0.1 * FORCE_MULTIPLIER;
-  const newX = mapRange(force[0] * forceMultiplier, -100, 100, -20, 20);
-  const newY = mapRange(force[1] * forceMultiplier, -100, 100, -20, 20);
+const movementToCss = (force: [number, number]): CSSProperties => {
+  const newX = mapRange(force[0] * FORCE_MULTIPLIER, -100, 100, -20, 20);
+  const newY = mapRange(force[1] * FORCE_MULTIPLIER, -100, 100, -20, 20);
   return {
     transform: `translate(${newX}px, ${newY}px)`,
-    transition: "transform 0.05s ease-in-out",
   };
+};
+
+const applyForces = (
+  force: number,
+  movement: number,
+  distance: number,
+): number => {
+  return (
+    (force + movement * CURSOR_FORCE_MULTIPLIER) *
+    mapRange(distance, 0, WIDTH, 0, 1)
+  );
 };
 
 function mapRange(
@@ -72,11 +76,21 @@ function mapRange(
 export default function Logo() {
   const { theme } = useTheme();
   const svgRef = useRef<SVGSVGElement | null>(null);
-  const [position, setPosition] = useState<[number, number]>([0, 0]);
 
   const [pieceForces, setPieceForces] = useState<[number, number][]>(
     pieces.map(() => [0, 0]),
   );
+
+  useAnimationFrame((deltaTime) => {
+    setPieceForces((prevForces) => {
+      return prevForces.map((pieceForce) => {
+        return [
+          pieceForce[0] * (1 - 0.00001 * deltaTime),
+          pieceForce[1] * (1 - 0.00001 * deltaTime),
+        ];
+      });
+    });
+  });
 
   return (
     <svg
@@ -87,21 +101,31 @@ export default function Logo() {
       ref={svgRef}
       style={{
         marginTop: 50,
-        width: "150px",
-        height: "150px",
+        width: `${WIDTH}px`,
+        height: `${HEIGHT}px`,
         fill: theme === "dark" ? "#fff" : "#0b0b0b",
         fillRule: "evenodd",
       }}
       onMouseMove={(e) => {
-        setPosition([
-          e.clientX - (svgRef.current?.getBoundingClientRect()?.x ?? 0),
-          e.clientY - (svgRef.current?.getBoundingClientRect()?.y ?? 0),
-        ]);
         setPieceForces((prev) =>
-          prev.map((pieceForce) => {
+          prev.map((pieceForce, i) => {
+            const piece = pieces[i]!;
+
+            const movementX =
+              e.clientX - (svgRef.current?.getBoundingClientRect()?.x ?? 0);
+            const movementY =
+              e.clientY - (svgRef.current?.getBoundingClientRect()?.y ?? 0);
+
+            const distance = euclideanDistance(
+              movementX,
+              movementY,
+              piece.center.x,
+              piece.center.y,
+            );
+
             return [
-              pieceForce[0] + e.movementX * 0.1,
-              pieceForce[1] + e.movementY * 0.1,
+              applyForces(pieceForce[0], e.movementX, distance),
+              applyForces(pieceForce[1], e.movementY, distance),
             ];
           }),
         );
@@ -111,7 +135,7 @@ export default function Logo() {
       {pieces.map((piece, i) => {
         return (
           <path
-            style={movementToCss(piece, position, pieceForces[i]!)}
+            style={movementToCss(pieceForces[i]!)}
             key={`path-${i}`}
             d={piece.path}
           />
