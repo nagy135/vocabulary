@@ -63,12 +63,9 @@ const movementToCss = (force: [number, number]): CSSProperties => {
     transform: `translate(${newX}px, ${newY}px)`,
   };
 };
+const k = 100; // NOTE: avoid rounding, 100 => [-3000,3000]
 function sigmoid(z: number): number {
-  const res = 1 / (1 + Math.exp(-z));
-  // NOTE: avoid rounding to 1 and -1
-  if (res === 1) return res - 0.01;
-  else if (res === -1) return res + 0.01;
-  else return res;
+  return 1 / (1 + Math.exp(-z / k));
 }
 
 const applyForces = (
