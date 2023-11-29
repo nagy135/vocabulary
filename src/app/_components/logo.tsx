@@ -42,7 +42,7 @@ C 33.479 5.145 33.531 5.092 33.595 5.056 C 33.655 5.02 33.724 5.001 33.795 5 Z`,
 
 const FORCE_MULTIPLIER = 0.3;
 const CURSOR_FORCE_MULTIPLIER = 5;
-const FORCE_DAMPENING = 0.1;
+const FORCE_DAMPENING = 10;
 
 const WIDTH = 150;
 const HEIGHT = 150;
@@ -63,6 +63,13 @@ const movementToCss = (force: [number, number]): CSSProperties => {
     transform: `translate(${newX}px, ${newY}px)`,
   };
 };
+function sigmoid(z: number): number {
+  const res = 1 / (1 + Math.exp(-z));
+  // NOTE: avoid rounding to 1 and -1
+  if (res === 1) return res - 0.01;
+  else if (res === -1) return res + 0.01;
+  else return res;
+}
 
 const applyForces = (
   force: number,
@@ -97,8 +104,8 @@ export default function Logo() {
     setPieceForces((prevForces) => {
       return prevForces.map((pieceForce) => {
         return [
-          pieceForce[0] * (FORCE_DAMPENING * deltaTime),
-          pieceForce[1] * (FORCE_DAMPENING * deltaTime),
+          pieceForce[0] * sigmoid(FORCE_DAMPENING * deltaTime),
+          pieceForce[1] * sigmoid(FORCE_DAMPENING * deltaTime),
         ];
       });
     });
