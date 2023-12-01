@@ -1,8 +1,8 @@
 export function levenshteinDistance(a: string, b: string): number {
   // Create a 2D array to store the distances
-  const distances = new Array<Array<number>>(a.length + 1);
+  const distances: number[][] = new Array(a.length + 1);
   for (let i = 0; i <= a.length; i++) {
-    distances[i] = new Array<Array<number>>(b.length + 1);
+    distances[i] = new Array(b.length + 1);
   }
 
   // Initialize the first row and column
