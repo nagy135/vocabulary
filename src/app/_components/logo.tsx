@@ -41,7 +41,7 @@ C 35.27 21.598 35.24 21.571 35.221 21.541 L 30.447 13.918 C 30.422 13.883 30.412
   },
 ];
 
-const FORCE_MULTIPLIER = 1.1;
+const FORCE_MULTIPLIER = 0.75;
 const CURSOR_FORCE_MULTIPLIER = 1.0;
 const FORCE_DAMPENING = 0.96;
 
@@ -138,8 +138,8 @@ export default function Logo() {
             );
 
             return [
-              applyForces(pieceForce[0], Math.min(e.movementX, 20), distance),
-              applyForces(pieceForce[1], Math.min(e.movementY, 20), distance),
+              applyForces(pieceForce[0], Math.min(e.movementX, 10), distance),
+              applyForces(pieceForce[1], Math.min(e.movementY, 10), distance),
             ];
           }),
         );
