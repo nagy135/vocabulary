@@ -11,6 +11,7 @@ import {
 import { type KnownRecord } from "./known-list";
 import { Checkbox } from "../ui/checkbox";
 import { Button } from "../ui/button";
+import { levenshteinDistance } from "~/helpers";
 export const columns = (
   actionCall: (knownId: number) => void,
 ): ColumnDef<KnownRecord>[] => [
@@ -52,6 +53,19 @@ export const columns = (
   },
   {
     accessorKey: "wordTranslation",
+    filterFn: (row, _id, valOriginal) => {
+      const value = valOriginal as string;
+      const translation = row.original.wordTranslation;
+      const name = row.original.wordName;
+      if (!translation || !name) return false;
+
+      return (
+        translation?.includes(value) ||
+        name?.includes(value) ||
+        levenshteinDistance(translation, value) <= 3 ||
+        levenshteinDistance(name, value) <= 3
+      );
+    },
     header: ({ column }) => {
       return (
         <Button
