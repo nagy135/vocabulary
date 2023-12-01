@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { type CSSProperties, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useAnimationFrame } from "../hooks/use-animation";
 
 type Piece = {
@@ -62,10 +62,10 @@ const newCoords = (force: [number, number]): [x: number, y: number] => {
   const newY = mapRange(force[1] * FORCE_MULTIPLIER, -200, 200, -50, 50);
   return [newX, newY];
 };
-const k = 100; // NOTE: avoid rounding, 100 => [-3000,3000]
-function sigmoid(z: number): number {
-  return 1 / (1 + Math.exp(-z / k));
-}
+// const k = 100; // NOTE: avoid rounding, 100 => [-3000,3000]
+// function sigmoid(z: number): number {
+//   return 1 / (1 + Math.exp(-z / k));
+// }
 
 const applyForces = (
   force: number,
@@ -87,14 +87,14 @@ function mapRange(
 }
 
 export default function Logo() {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   const [pieceForces, setPieceForces] = useState<[number, number][]>(
     pieces.map(() => [0, 0]),
   );
 
-  useAnimationFrame((deltaTime) => {
+  useAnimationFrame((_deltaTime) => {
     setPieceForces((prevForces) => {
       return prevForces.map((pieceForce) => {
         return [
@@ -116,7 +116,7 @@ export default function Logo() {
         marginTop: 50,
         width: `${WIDTH}px`,
         height: `${HEIGHT}px`,
-        fill: theme === "dark" ? "#fff" : "#0b0b0b",
+        fill: resolvedTheme === "light" ? "#0b0b0b" : "#fff",
         fillRule: "evenodd",
       }}
       onMouseMove={(e) => {
@@ -153,6 +153,8 @@ export default function Logo() {
             style={{
               transform: `translate(${newC[0]}px, ${newC[1]}px)`,
             }}
+            stroke="#0b0b0b"
+            strokeWidth={0.3}
             key={`path-${i}`}
             d={piece.path}
           />
