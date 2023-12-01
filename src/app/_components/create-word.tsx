@@ -64,10 +64,11 @@ export function CreateWord() {
     onSuccess: () => {
       form.reset();
     },
-    onError: () => {
+    onError: (error) => {
+      const matches = error.message;
       toast({
-        title: "Create failed",
-        description: "Could not create translation pair",
+        title: "Too close to already existing word pair",
+        description: matches,
         variant: "destructive",
       });
     },
