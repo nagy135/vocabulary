@@ -15,37 +15,38 @@ type Piece = {
 const pieces: Piece[] = [
   {
     center: {
-      x: 113,
-      y: 43,
+      x: 163,
+      y: 101,
     },
-    path: `M 6.408 5 L 19.473 5 C 19.543 4.998 19.612 5.015 19.673 5.048
-C 19.732 5.081 19.782 5.127 19.817 5.184 L 35.724 30.576 C 35.811 30.707
-35.811 30.876 35.724 31.007 L 29.216 41.374 C 29.18 41.43 29.13 41.477 29.072
-41.51 C 28.95 41.577 28.802 41.577 28.679 41.51 C 28.621 41.477 28.571 41.43
-28.535 41.374 L 6.064 5.615 C 6.025 5.555 6.003 5.487 6 5.416 C 5.997 5.343
-6.013 5.272 6.048 5.208 C 6.084 5.145 6.136 5.092 6.2 5.056 C 6.263 5.018 6.335 4.999 6.408 5 Z`,
+    path: `M 15.674 13.58 L 22.809 13.58 C 22.845 13.579 22.884 13.587
+22.918 13.606 C 22.951 13.627 22.977 13.652 22.995 13.681 L 31.684 27.569
+C 31.727 27.643 31.727 27.736 31.684 27.806 L 28.127 33.475 C 28.109 33.508
+28.079 33.533 28.051 33.55 C 27.982 33.59 27.902 33.59 27.834 33.55 C 27.803
+33.533 27.777 33.508 27.757 33.475 L 15.484 13.918 C 15.465 13.883 15.451
+13.849 15.45 13.806 C 15.448 13.77 15.457 13.729 15.476 13.695 C 15.495 13.658
+15.524 13.63 15.559 13.608 C 15.595 13.589 15.633 13.579 15.674 13.58 Z`,
   },
   {
     center: {
-      x: 60,
-      y: 67,
+      x: 110,
+      y: 120,
     },
-    path: `M 33.795 5 L 51.295 5 C 51.368 4.999 51.44 5.018 51.503 5.056
-C 51.558 5.095 51.602 5.147 51.631 5.208 C 51.665 5.272 51.682 5.344 51.679
-5.416 C 51.681 5.485 51.664 5.554 51.631 5.615 L 42.889 19.554 C 42.853
-19.611 42.804 19.657 42.745 19.69 C 42.623 19.757 42.475 19.757 42.353
-19.69 C 42.294 19.657 42.245 19.611 42.209 19.554 L 33.459 5.615 C 33.42
-5.555 33.398 5.487 33.395 5.416 C 33.392 5.343 33.408 5.272 33.443 5.208
-C 33.479 5.145 33.531 5.092 33.595 5.056 C 33.655 5.02 33.724 5.001 33.795 5 Z`,
+    path: `M 30.626 13.58 L 40.185 13.58 C 40.227 13.579 40.263 13.589 40.302
+13.608 C 40.328 13.631 40.353 13.661 40.371 13.695 C 40.386 13.729 40.4 13.77
+40.4 13.806 C 40.4 13.846 40.386 13.883 40.371 13.918 L 35.595 21.541 C 35.577
+21.571 35.546 21.598 35.515 21.616 C 35.447 21.649 35.367 21.649 35.303 21.616
+C 35.27 21.598 35.24 21.571 35.221 21.541 L 30.447 13.918 C 30.422 13.883 30.412
+13.849 30.406 13.806 C 30.406 13.77 30.42 13.729 30.437 13.695 C 30.455 13.658
+30.481 13.63 30.521 13.608 C 30.551 13.59 30.592 13.58 30.626 13.58 Z`,
   },
 ];
 
 const FORCE_MULTIPLIER = 0.3;
-const CURSOR_FORCE_MULTIPLIER = 5;
-const FORCE_DAMPENING = 10;
+const CURSOR_FORCE_MULTIPLIER = 4;
+const FORCE_DAMPENING = 0.99;
 
-const WIDTH = 150;
-const HEIGHT = 150;
+const WIDTH = 250;
+const HEIGHT = 250;
 
 const euclideanDistance = (
   x: number,
@@ -73,10 +74,8 @@ const applyForces = (
   movement: number,
   distance: number,
 ): number => {
-  return (
-    (force + movement * CURSOR_FORCE_MULTIPLIER) *
-    mapRange(distance, 0, WIDTH, 0, 1)
-  );
+  const distanceDebuff = mapRange(distance, 0, 100, 0, 1) * 0.3;
+  return force + movement * distanceDebuff * CURSOR_FORCE_MULTIPLIER;
 };
 
 function mapRange(
@@ -101,12 +100,12 @@ export default function Logo() {
     setPieceForces((prevForces) => {
       return prevForces.map((pieceForce) => {
         return [
-          pieceForce[0] * sigmoid(FORCE_DAMPENING * deltaTime),
-          pieceForce[1] * sigmoid(FORCE_DAMPENING * deltaTime),
+          pieceForce[0] * FORCE_DAMPENING,
+          pieceForce[1] * FORCE_DAMPENING,
         ];
       });
     });
-  });
+  }, 1000 / 140);
 
   return (
     <svg
@@ -140,8 +139,8 @@ export default function Logo() {
             );
 
             return [
-              applyForces(pieceForce[0], e.movementX, distance),
-              applyForces(pieceForce[1], e.movementY, distance),
+              applyForces(pieceForce[0], Math.min(e.movementX, 20), distance),
+              applyForces(pieceForce[1], Math.min(e.movementY, 20), distance),
             ];
           }),
         );

@@ -1,13 +1,22 @@
+import { deleteCache } from "next/dist/server/lib/render-server";
 import { useEffect, useRef } from "react";
 
-export const useAnimationFrame = (callback: (deltaTime: number) => void) => {
+export const useAnimationFrame = (
+  callback: (deltaTime: number) => void,
+  ms: number,
+) => {
   const requestRef = useRef<number | undefined>(undefined);
   const previousTimeRef = useRef<number | undefined>(undefined);
+  const passedRef = useRef<number>(0);
 
   const animate = (time: number) => {
     if (previousTimeRef.current != undefined) {
       const deltaTime = time - previousTimeRef.current;
-      callback(deltaTime);
+      if (passedRef.current > ms) {
+        passedRef.current = 0;
+        callback(deltaTime);
+      }
+      passedRef.current += deltaTime;
     }
     previousTimeRef.current = time;
     requestRef.current = requestAnimationFrame(animate);
