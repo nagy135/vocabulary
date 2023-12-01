@@ -15,8 +15,8 @@ type Piece = {
 const pieces: Piece[] = [
   {
     center: {
-      x: 163,
-      y: 101,
+      x: 110,
+      y: 120,
     },
     path: `M 15.674 13.58 L 22.809 13.58 C 22.845 13.579 22.884 13.587
 22.918 13.606 C 22.951 13.627 22.977 13.652 22.995 13.681 L 31.684 27.569
@@ -28,8 +28,8 @@ C 31.727 27.643 31.727 27.736 31.684 27.806 L 28.127 33.475 C 28.109 33.508
   },
   {
     center: {
-      x: 110,
-      y: 120,
+      x: 163,
+      y: 101,
     },
     path: `M 30.626 13.58 L 40.185 13.58 C 40.227 13.579 40.263 13.589 40.302
 13.608 C 40.328 13.631 40.353 13.661 40.371 13.695 C 40.386 13.729 40.4 13.77
@@ -41,9 +41,9 @@ C 35.27 21.598 35.24 21.571 35.221 21.541 L 30.447 13.918 C 30.422 13.883 30.412
   },
 ];
 
-const FORCE_MULTIPLIER = 0.3;
-const CURSOR_FORCE_MULTIPLIER = 4;
-const FORCE_DAMPENING = 0.99;
+const FORCE_MULTIPLIER = 1.1;
+const CURSOR_FORCE_MULTIPLIER = 1.0;
+const FORCE_DAMPENING = 0.96;
 
 const WIDTH = 250;
 const HEIGHT = 250;
@@ -57,12 +57,10 @@ const euclideanDistance = (
   return Math.sqrt(Math.pow(x - x2, 2) + Math.pow(y - y2, 2));
 };
 
-const movementToCss = (force: [number, number]): CSSProperties => {
+const newCoords = (force: [number, number]): [x: number, y: number] => {
   const newX = mapRange(force[0] * FORCE_MULTIPLIER, -200, 200, -50, 50);
   const newY = mapRange(force[1] * FORCE_MULTIPLIER, -200, 200, -50, 50);
-  return {
-    transform: `translate(${newX}px, ${newY}px)`,
-  };
+  return [newX, newY];
 };
 const k = 100; // NOTE: avoid rounding, 100 => [-3000,3000]
 function sigmoid(z: number): number {
@@ -74,7 +72,7 @@ const applyForces = (
   movement: number,
   distance: number,
 ): number => {
-  const distanceDebuff = mapRange(distance, 0, 100, 0, 1) * 0.3;
+  const distanceDebuff = 1 - mapRange(distance, 0, 200, 0, 1) / 0.6;
   return force + movement * distanceDebuff * CURSOR_FORCE_MULTIPLIER;
 };
 
@@ -125,6 +123,7 @@ export default function Logo() {
         setPieceForces((prev) =>
           prev.map((pieceForce, i) => {
             const piece = pieces[i]!;
+            const newC = newCoords(pieceForces[i]!);
 
             const movementX =
               e.clientX - (svgRef.current?.getBoundingClientRect()?.x ?? 0);
@@ -134,8 +133,8 @@ export default function Logo() {
             const distance = euclideanDistance(
               movementX,
               movementY,
-              piece.center.x,
-              piece.center.y,
+              piece.center.x + newC[0],
+              piece.center.y + newC[1],
             );
 
             return [
@@ -148,9 +147,12 @@ export default function Logo() {
     >
       <title>v</title>
       {pieces.map((piece, i) => {
+        const newC = newCoords(pieceForces[i]!);
         return (
           <path
-            style={movementToCss(pieceForces[i]!)}
+            style={{
+              transform: `translate(${newC[0]}px, ${newC[1]}px)`,
+            }}
             key={`path-${i}`}
             d={piece.path}
           />
