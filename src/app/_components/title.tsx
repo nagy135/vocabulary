@@ -10,7 +10,7 @@ export default function Title({ page, title }: Title) {
   return (
     <>
       <Navigation currentPage={page} />
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 pb-16 pt-2 pt-24 ">
+      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 pt-24 ">
         <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
           {title}
         </h1>
