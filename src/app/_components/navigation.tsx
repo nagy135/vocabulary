@@ -67,7 +67,7 @@ export default function Navigation({ currentPage }: { currentPage: Page }) {
       <div className="absolute left-0 top-0 m-3 gap-2">
         <Hamburger toggled={isHamburgerOpen} toggle={setIsHamburgerOpen} />
         <div
-          className={`flex flex-col gap-3 ${
+          className={`mt-3 flex flex-col gap-3 ${
             isHamburgerOpen ? "opacity-100" : "opacity-0"
           } transition duration-300`}
         >

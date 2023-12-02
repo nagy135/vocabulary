@@ -44,6 +44,7 @@ C 35.27 21.598 35.24 21.571 35.221 21.541 L 30.447 13.918 C 30.422 13.883 30.412
 const FORCE_MULTIPLIER = 0.75;
 const CURSOR_FORCE_MULTIPLIER = 1.0;
 const FORCE_DAMPENING = 0.96;
+const MAX_FORCE_DISTANCE = 70;
 
 const WIDTH = 250;
 const HEIGHT = 250;
@@ -72,7 +73,16 @@ const applyForces = (
   movement: number,
   distance: number,
 ): number => {
-  const distanceDebuff = 1 - mapRange(distance, 0, 200, 0, 1) / 0.6;
+  const distanceDebuff =
+    1 *
+    (1 -
+      mapRange(
+        distance < MAX_FORCE_DISTANCE ? distance : MAX_FORCE_DISTANCE,
+        0,
+        MAX_FORCE_DISTANCE,
+        0,
+        1,
+      ));
   return force + movement * distanceDebuff * CURSOR_FORCE_MULTIPLIER;
 };
 
@@ -138,8 +148,8 @@ export default function Logo() {
             );
 
             return [
-              applyForces(pieceForce[0], Math.min(e.movementX, 10), distance),
-              applyForces(pieceForce[1], Math.min(e.movementY, 10), distance),
+              applyForces(pieceForce[0], Math.min(e.movementX, 5), distance),
+              applyForces(pieceForce[1], Math.min(e.movementY, 5), distance),
             ];
           }),
         );
