@@ -10,7 +10,7 @@ export default async function LearnedPage() {
 
   const knowns = await api.known.getAllWithWord.query(user.id);
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center">
+    <main className="flex min-h-screen flex-col items-center">
       <Title title={"Learned"} page={Page.learned} />
       <KnownList
         knowns={knowns.map((e) => ({

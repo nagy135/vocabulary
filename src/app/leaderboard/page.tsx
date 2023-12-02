@@ -19,7 +19,7 @@ export default async function LeaderboardPage() {
   });
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center">
+    <main className="flex min-h-screen flex-col items-center">
       <Title title={"Leaderboard"} page={Page.leaderboard} />
       <LeaderboardList leaderboards={leaderBoardData} />
     </main>
