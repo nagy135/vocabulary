@@ -51,6 +51,17 @@ export default function Navigation({ currentPage }: { currentPage: Page }) {
   const screenWidth = useScreenWidth();
   const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
 
+  const buttons = linksToShow[currentPage].pages.map((e, i) => (
+    <Link prefetch={false} key={`navigation-${i}`} href={pageData[e].url}>
+      <Button
+        id={`navigation-${pageData[e].label}`}
+        variant={linksToShow[e].variant ?? "default"}
+      >
+        {pageData[e].label}
+      </Button>
+    </Link>
+  ));
+
   if (!screenWidth || screenWidth < 768) {
     return (
       <div className="absolute left-0 top-0 m-3 gap-2">
@@ -60,37 +71,10 @@ export default function Navigation({ currentPage }: { currentPage: Page }) {
             isHamburgerOpen ? "opacity-100" : "opacity-0"
           } transition duration-300`}
         >
-          {linksToShow[currentPage].pages.map((e, i) => (
-            <Link
-              prefetch={false}
-              key={`navigation-${i}`}
-              href={pageData[e].url}
-            >
-              <Button
-                id={`navigation-${pageData[e].label}`}
-                onClick={() => setIsHamburgerOpen(false)}
-                variant={linksToShow[e].variant ?? "default"}
-              >
-                {pageData[e].label}
-              </Button>
-            </Link>
-          ))}
+          {buttons}
         </div>
       </div>
     );
   }
-  return (
-    <div className="absolute left-0 top-0 m-3 flex gap-2">
-      {linksToShow[currentPage].pages.map((e, i) => (
-        <Link prefetch={false} key={`navigation-${i}`} href={pageData[e].url}>
-          <Button
-            id={`navigation-${pageData[e].label}`}
-            variant={linksToShow[e].variant ?? "default"}
-          >
-            {pageData[e].label}
-          </Button>
-        </Link>
-      ))}
-    </div>
-  );
+  return <div className="absolute left-0 top-0 m-3 flex gap-2">{buttons}</div>;
 }
