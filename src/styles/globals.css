@@ -65,7 +65,7 @@
     --ring: 212.7 26.8% 83.9%;
   }
 }
-.hamburger-react {
+.hamburger-react .a {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
