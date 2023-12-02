@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import { Page, PageUrl } from "~/enums";
 import { useState, type ComponentProps } from "react";
 import useScreenWidth from "../hooks/use-screen-width";
-import Hamburger from "hamburger-react";
+import { Divide as Hamburger } from "hamburger-react";
 
 const linksToShow: Record<
   Page,
