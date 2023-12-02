@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { Page, PageUrl } from "~/enums";
-import { type ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
+import useScreenWidth from "../hooks/use-screen-width";
+import Hamburger from "hamburger-react";
 
 const linksToShow: Record<
   Page,
@@ -44,6 +48,37 @@ export const pageData: Record<Page, { url: string; label: string }> = {
 };
 
 export default function Navigation({ currentPage }: { currentPage: Page }) {
+  const screenWidth = useScreenWidth();
+  const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
+
+  if (!screenWidth || screenWidth < 768) {
+    return (
+      <div className="absolute left-0 top-0 m-3 gap-2">
+        <Hamburger toggled={isHamburgerOpen} toggle={setIsHamburgerOpen} />
+        <div
+          className={`flex flex-col gap-3 ${
+            isHamburgerOpen ? "opacity-100" : "opacity-0"
+          } transition duration-300`}
+        >
+          {linksToShow[currentPage].pages.map((e, i) => (
+            <Link
+              prefetch={false}
+              key={`navigation-${i}`}
+              href={pageData[e].url}
+            >
+              <Button
+                id={`navigation-${pageData[e].label}`}
+                onClick={() => setIsHamburgerOpen(false)}
+                variant={linksToShow[e].variant ?? "default"}
+              >
+                {pageData[e].label}
+              </Button>
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="absolute left-0 top-0 m-3 flex gap-2">
       {linksToShow[currentPage].pages.map((e, i) => (
